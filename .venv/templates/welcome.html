@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Lieferspatz!</title>
+</head>
+<body>
+    <h1>Welcome to Lieferspatz!</h1>
+    <p>Are you a user or a restaurant?</p>
+    <form method="POST" action="{{ url_for('welcome') }}">
+        <label for="user">User</label>
+        <input type="radio" name="user_type" value="user" id="user" required>
+        <label for="restaurant">Restaurant</label>
+        <input type="radio" name="user_type" value="restaurant" id="restaurant" required>
+        <br>
+        <input type="submit" value="Continue">
+    </form>
+</body>
+</html>

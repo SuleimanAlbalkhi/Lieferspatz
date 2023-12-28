@@ -14,6 +14,7 @@ cursor.execute('''
     CREATE TABLE IF NOT EXISTS Restaurants (
         id INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
+        username TEXT NOT NULL,
         address TEXT NOT NULL,
         description TEXT,
         image_path TEXT,
@@ -29,6 +30,7 @@ cursor.execute('''
         id INTEGER PRIMARY KEY,
         first_name TEXT NOT NULL,
         last_name TEXT NOT NULL,
+        username TEXT NOT NULL,
         address TEXT NOT NULL,
         postal_code TEXT NOT NULL,
         password_hash TEXT NOT NULL
@@ -63,7 +65,7 @@ def login_user():
         cursor = conn.cursor()
 
         # Benutzerdaten abrufen
-        cursor.execute("SELECT * FROM Users WHERE address=?", (username,))
+        cursor.execute("SELECT * FROM Users WHERE username=?", (username,))
         user = cursor.fetchone()
 
         # Überprüfen, ob der Benutzer existiert und das Passwort korrekt ist
@@ -85,7 +87,7 @@ def login_restaurant():
         cursor = conn.cursor()
 
         # Restaurantdaten abrufen
-        cursor.execute("SELECT * FROM Restaurants WHERE address=?", (username,))
+        cursor.execute("SELECT * FROM Restaurants WHERE username=?", (username,))
         restaurant = cursor.fetchone()
 
         # Überprüfen, ob das Restaurant existiert und das Passwort korrekt ist

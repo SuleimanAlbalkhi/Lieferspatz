@@ -16,6 +16,7 @@ cursor.execute('''
         name TEXT NOT NULL,
         username TEXT NOT NULL,
         address TEXT NOT NULL,
+        postal_code TEXT NOT NULL,
         description TEXT,
         image_path TEXT,
         password_hash TEXT NOT NULL,
@@ -137,6 +138,7 @@ def register_restaurant():
         name = request.form['name']
         username = request.form['username']
         address = request.form['address']
+        postal_code = request.form['postal_code']
         description = request.form['description']
         image_path = request.form['image_path']
         password = request.form['password']

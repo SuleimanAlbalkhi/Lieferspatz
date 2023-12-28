@@ -105,21 +105,21 @@ def register_user():
         postal_code = request.form['postal_code']
         password = request.form['password']
 
-        # Passwort hashen
-        password_hash = generate_password_hash(password, method='sha256')
 
         # Verbindung zur Datenbank herstellen
         conn = sqlite3.connect('mydatabase.db')
         cursor = conn.cursor()
 
         # Benutzer in die Datenbank einfügen
-        cursor.execute("INSERT INTO Users (first_name, last_name, address, postal_code, password_hash) VALUES (?, ?, ?, ?, ?)",
-                       (first_name, last_name, address, postal_code, password_hash))
+        cursor.execute("INSERT INTO Users (first_name, last_name, address, postal_code, password) VALUES (?, ?, ?, ?, ?)",
+                       (first_name, last_name, address, postal_code, password))
 
         # Änderungen speichern und Verbindung schließen
         conn.commit()
         conn.close()
 
+        flash('Registration successful. You can now log in.', 'success')
+        
         return redirect(url_for('login_user'))
 
     return render_template('register_user.html')
@@ -151,6 +151,8 @@ def register_restaurant():
         # Änderungen speichern und Verbindung schließen
         conn.commit()
         conn.close()
+
+        flash('Registration successful. You can now log in.', 'success')
 
         return redirect(url_for('login_restaurant'))
 

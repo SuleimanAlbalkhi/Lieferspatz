@@ -104,6 +104,7 @@ def register_user():
     if request.method == 'POST':
         first_name = request.form['first_name']
         last_name = request.form['last_name']
+        username = request.form['username']
         address = request.form['address']
         postal_code = request.form['postal_code']
         password = request.form['password']
@@ -134,6 +135,7 @@ def register_user():
 def register_restaurant():
     if request.method == 'POST':
         name = request.form['name']
+        username = request.form['username']
         address = request.form['address']
         description = request.form['description']
         image_path = request.form['image_path']

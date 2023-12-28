@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Login</title>
+    <title>User Login</title> <a href="{{ url_for('welcome') }}">Home</a>
 </head>
 <body>
-    <h1>User Login</h1> <a href="{{ url_for('welcome') }}">Home</a>
+    <h1>User Login</h1> 
     <form method="POST" action="{{ url_for('login_user') }}">
         <label for="username">Username (Address):</label>
         

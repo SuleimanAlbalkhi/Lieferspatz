@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, session,flash
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+import os
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Ändern Sie dies in der Produktion!
@@ -35,6 +38,18 @@ cursor.execute('''
         address TEXT NOT NULL,
         postal_code INTEGER NOT NULL,
         password_hash TEXT NOT NULL
+    )
+''')
+
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS MenuItems (
+        id INTEGER PRIMARY KEY,
+        restaurant_id INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        description TEXT,
+        price FLOAT NOT NULL,
+        image_path TEXT,
+        FOREIGN KEY(restaurant_id) REFERENCES Restaurants(id)
     )
 ''')
 
@@ -168,6 +183,137 @@ def register_restaurant():
 
     return render_template('register_restaurant.html')
 
+@app.route('/menu', methods=['GET'])
+def view_menu():
+    if 'restaurant_id' in session:
+        restaurant_id = session['restaurant_id']
+
+        # Verbindung zur Datenbank herstellen
+        conn = sqlite3.connect('mydatabase.db')
+        cursor = conn.cursor()
+
+        # Speisekarte des Restaurants abrufen
+        cursor.execute("SELECT * FROM MenuItems WHERE restaurant_id=?", (restaurant_id,))
+        menu_items = cursor.fetchall()
+
+        # Verbindung schließen
+        conn.close()
+
+        return render_template('view_menu.html', menu_items=menu_items)
+
+    return redirect(url_for('login_restaurant'))
+                
+UPLOAD_FOLDER = 'D:/Suleiman/DB/Lieferspatz/.venv/static/Uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/add_item', methods=['GET', 'POST'])
+def add_menu_item():
+    if 'restaurant_id' in session:
+        if request.method == 'POST':
+            name = request.form['name']
+            description = request.form['description']
+            price = request.form['price']
+
+            # Bild-Upload verarbeiten
+            if 'image' in request.files:
+                file = request.files['image']
+                if file and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
+                else:
+                    flash('Ungültiges Dateiformat für Bild. Nur PNG, JPG, JPEG oder GIF sind erlaubt.', 'error')
+
+            # Weitere Informationen zur Datenbank hinzufügen
+            restaurant_id = session['restaurant_id']
+
+            # Verbindung zur Datenbank herstellen
+            conn = sqlite3.connect('mydatabase.db')
+            cursor = conn.cursor()
+
+            cursor.execute("INSERT INTO MenuItems (name, description, price, image_path, restaurant_id) VALUES (?, ?, ?, ?, ?)",
+                           (name, description, price, file_path, restaurant_id))
+
+            # Änderungen speichern und Verbindung schließen
+            conn.commit()
+            conn.close()
+
+            flash('Item wurde zur Speisekarte hinzugefügt.', 'success')
+
+        return render_template('add_menu_item.html')
+
+    return redirect(url_for('login_restaurant'))
+
+@app.route('/remove_item/<int:item_id>', methods=['GET'])
+def remove_menu_item(item_id):
+    if 'restaurant_id' in session:
+        # Verbindung zur Datenbank herstellen
+        conn = sqlite3.connect('mydatabase.db')
+        cursor = conn.cursor()
+
+        # Item aus der Speisekarte entfernen
+        cursor.execute("DELETE FROM MenuItems WHERE id=?", (item_id,))
+
+        # Änderungen speichern und Verbindung schließen
+        conn.commit()
+        conn.close()
+
+        flash('Item wurde von der Speisekarte entfernt.', 'success')
+
+        return redirect(url_for('view_menu'))
+
+    return redirect(url_for('login_restaurant'))
+
+@app.route('/edit_item/<int:item_id>', methods=['GET', 'POST'])
+def edit_menu_item(item_id):
+    if 'restaurant_id' in session:
+        # Verbindung zur Datenbank herstellen
+        conn = sqlite3.connect('mydatabase.db')
+        cursor = conn.cursor()
+
+        if request.method == 'POST':
+            name = request.form['name']
+            description = request.form['description']
+            price = request.form['price']
+
+            # Bild-Upload verarbeiten
+            if 'image' in request.files:
+                file = request.files['image']
+                if file and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
+                else:
+                    flash('Ungültiges Dateiformat für Bild. Nur PNG, JPG, JPEG oder GIF sind erlaubt.', 'error')
+
+            # Item in der Datenbank aktualisieren
+            cursor.execute("UPDATE MenuItems SET name=?, description=?, price=?, image_path=? WHERE id=?",
+                           (name, description, price, file_path, item_id))
+
+            # Änderungen speichern und Verbindung schließen
+            conn.commit()
+            conn.close()
+
+            flash('Item wurde aktualisiert.', 'success')
+            return redirect(url_for('view_menu'))
+
+        # Informationen zum Item abrufen und im Formular anzeigen
+        cursor.execute("SELECT * FROM MenuItems WHERE id=?", (item_id,))
+        menu_item = cursor.fetchone()
+
+        # Verbindung schließen
+        conn.close()
+
+        return render_template('edit_menu_item.html', menu_item=menu_item)
+
+    return redirect(url_for('login_restaurant'))
+
+
 # Dashboard für angemeldete Benutzer
 @app.route('/dashboard/user')
 def dashboard_user():
@@ -179,10 +325,11 @@ def dashboard_user():
 @app.route('/dashboard/restaurant')
 def dashboard_restaurant():
     if 'restaurant_id' in session:
-        return f'Welcome, Restaurant! Your restaurant ID is {session["restaurant_id"]}'
+        restaurant_id = session['restaurant_id']
+        return render_template('dashboard_restaurant.html', restaurant_id=restaurant_id)
     return redirect(url_for('login_restaurant'))
 
-# Weitere Routen und Funktionen hier definieren...
+
 
 if __name__ == '__main__':
     app.run(debug=True)

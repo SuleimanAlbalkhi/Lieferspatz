@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Neues Item hinzufügen</title>
+</head>
+<body>
+    <h1>Neues Item hinzufügen</h1>
+
+    <form action="{{ url_for('add_menu_item') }}" method="post" enctype="multipart/form-data">
+        <label>Name:</label>
+        <input type="text" name="name" required><br>
+
+        <label>Beschreibung:</label>
+        <textarea name="description" required></textarea><br>
+
+        <label>Preis:</label>
+        <input type="text" name="price" required><br>
+
+        <label>Bild hochladen:</label>
+        <input type="file" name="image"><br>
+
+        <input type="submit" value="Hinzufügen">
+    </form>
+</body>
+</html>

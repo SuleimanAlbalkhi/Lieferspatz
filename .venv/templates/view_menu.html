@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Speisekarte</title>
+</head>
+<body>
+    <h1>Speisekarte</h1>
+
+    {% if menu_items %}
+        <ul>
+            {% for item in menu_items %}
+                <li>
+                    <img src="{{ item.image_path }}" alt="{{ item.name }}">
+                    <h3>{{ item.name }}</h3>
+                    <p>{{ item.description }}</p>
+                    <p>Preis: {{ item.price }}</p>
+                    <a class="edit-link" href="{{ url_for('edit_menu_item', item_id=item[0]) }}">Bearbeiten</a>
+                    <a class="remove-link" href="{{ url_for('remove_menu_item', item_id=item[0]) }}">Entfernen</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Die Speisekarte ist derzeit leer.</p>
+    {% endif %}
+
+    <!-- Link zum Hinzufügen neuer Items -->
+    <a href="{{ url_for('add_menu_item') }}">Neues Item hinzufügen</a>
+</body>
+</html>

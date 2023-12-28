@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Item bearbeiten</title>
+</head>
+<body>
+    <h1>Item bearbeiten</h1>
+
+    <form action="{{ url_for('edit_menu_item', item_id=menu_item[0]) }}" method="post" enctype="multipart/form-data">
+        <label>Name:</label>
+        <input type="text" name="name" value="{{ menu_item[2] }}" required><br>
+
+        <label>Beschreibung:</label>
+        <textarea name="description" required>{{ menu_item[3] }}</textarea><br>
+
+        <label>Preis:</label>
+        <input type="text" name="price" value="{{ menu_item[4] }}" required><br>
+
+        <label>Bild hochladen:</label>
+        <input type="file" name="image"><br>
+
+        <input type="submit" value="Aktualisieren">
+    </form>
+</body>
+</html>

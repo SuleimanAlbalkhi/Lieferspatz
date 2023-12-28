@@ -1,0 +1,14 @@
+<!-- In dashboard_restaurant.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Restaurant Dashboard</title>
+</head>
+<body>
+    <h1>Welcome, Restaurant!</h1>
+    <p>Your restaurant ID is {{ restaurant_id }}</p>
+
+    <!-- Link zur Speisekarte hinzufügen -->
+    <a href="{{ url_for('view_menu') }}">Go to Menu</a>
+</body>
+</html>

@@ -19,8 +19,8 @@ cursor.execute('''
         description TEXT,
         image_path TEXT,
         password_hash TEXT NOT NULL,
-        opening_time TEXT NOT NULL,
-        closing_time TEXT NOT NULL,
+        opening_time TIME  NOT NULL,
+        closing_time TIME  NOT NULL,
         delivery_radius TEXT NOT NULL
     )
 ''')

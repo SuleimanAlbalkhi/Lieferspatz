@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session,flash
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -16,7 +16,7 @@ cursor.execute('''
         name TEXT NOT NULL,
         username TEXT NOT NULL,
         address TEXT NOT NULL,
-        postal_code TEXT NOT NULL,
+        postal_code INTEGER NOT NULL,
         description TEXT,
         image_path TEXT,
         password_hash TEXT NOT NULL,
@@ -33,7 +33,7 @@ cursor.execute('''
         last_name TEXT NOT NULL,
         username TEXT NOT NULL,
         address TEXT NOT NULL,
-        postal_code TEXT NOT NULL,
+        postal_code INTEGER NOT NULL,
         password_hash TEXT NOT NULL
     )
 ''')
@@ -70,7 +70,7 @@ def login_user():
         user = cursor.fetchone()
 
         # Überprüfen, ob der Benutzer existiert und das Passwort korrekt ist
-        if user and check_password_hash(user[5], password):
+        if user and check_password_hash(user[6], password):
             session['user_id'] = user[0]
             return redirect(url_for('dashboard_user'))
 
@@ -92,7 +92,7 @@ def login_restaurant():
         restaurant = cursor.fetchone()
 
         # Überprüfen, ob das Restaurant existiert und das Passwort korrekt ist
-        if restaurant and check_password_hash(restaurant[5], password):
+        if restaurant and check_password_hash(restaurant[7], password):
             session['restaurant_id'] = restaurant[0]
 
             return redirect(url_for('dashboard_restaurant'))
@@ -111,7 +111,7 @@ def register_user():
         password = request.form['password']
 
         # Passwort hashen
-        password_hash = generate_password_hash(password, method='sha256')
+        password_hash = generate_password_hash(password)
 
 
         # Verbindung zur Datenbank herstellen
@@ -119,13 +119,14 @@ def register_user():
         cursor = conn.cursor()
 
         # Benutzer in die Datenbank einfügen
-        cursor.execute("INSERT INTO Users (first_name, last_name, address, postal_code, password_hash) VALUES (?, ?, ?, ?, ?)",
-                       (first_name, last_name, address, postal_code, password_hash))
+        cursor.execute("INSERT INTO Users (first_name, last_name, username, address, postal_code, password_hash) VALUES (?, ?, ?, ?, ?, ?)",
+               (first_name, last_name, username, address, postal_code, password_hash))
+
 
         # Änderungen speichern und Verbindung schließen
         conn.commit()
         conn.close()
-        flash('Registration successful. You can now log in.', 'success')
+        
 
         return redirect(url_for('login_user'))
 
@@ -147,21 +148,21 @@ def register_restaurant():
         delivery_radius = request.form['delivery_radius']
 
         # Passwort hashen
-        password_hash = generate_password_hash(password, method='sha256')
+        password_hash = generate_password_hash(password)
 
         # Verbindung zur Datenbank herstellen
         conn = sqlite3.connect('mydatabase.db')
         cursor = conn.cursor()
 
         # Restaurant in die Datenbank einfügen
-        cursor.execute("INSERT INTO Restaurants (name, address, description, image_path, password_hash, opening_time, closing_time, delivery_radius) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                       (name, address, description, image_path, password_hash, opening_time, closing_time, delivery_radius))
+        cursor.execute("INSERT INTO Restaurants (name, address, username, description, image_path, password_hash, opening_time, closing_time, delivery_radius, postal_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+               (name, address, username, description, image_path, password_hash, opening_time, closing_time, delivery_radius, postal_code))
+
 
         # Änderungen speichern und Verbindung schließen
         conn.commit()
         conn.close()
 
-        flash('Registration successful. You can now log in.', 'success')
 
         return redirect(url_for('login_restaurant'))
 

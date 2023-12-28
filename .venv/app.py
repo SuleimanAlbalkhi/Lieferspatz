@@ -137,16 +137,15 @@ def register_restaurant():
         closing_time = request.form['closing_time']
         delivery_radius = request.form['delivery_radius']
 
-        # Passwort hashen
-        password_hash = generate_password_hash(password, method='sha256')
+        
 
         # Verbindung zur Datenbank herstellen
         conn = sqlite3.connect('mydatabase.db')
         cursor = conn.cursor()
 
         # Restaurant in die Datenbank einfügen
-        cursor.execute("INSERT INTO Restaurants (name, address, description, image_path, password_hash, opening_time, closing_time, delivery_radius) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                       (name, address, description, image_path, password_hash, opening_time, closing_time, delivery_radius))
+        cursor.execute("INSERT INTO Restaurants (name, address, description, image_path, password, opening_time, closing_time, delivery_radius) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                       (name, address, description, image_path, password, opening_time, closing_time, delivery_radius))
 
         # Änderungen speichern und Verbindung schließen
         conn.commit()

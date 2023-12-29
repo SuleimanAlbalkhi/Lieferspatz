@@ -183,9 +183,11 @@ def register_restaurant():
 
     return render_template('register_restaurant.html')
 
+
+# In app.py
 @app.route('/menu', methods=['GET'])
 def view_menu():
-    if 'restaurant_id' in session:
+    if session.get('restaurant_id'):
         restaurant_id = session['restaurant_id']
 
         # Verbindung zur Datenbank herstellen
@@ -196,13 +198,16 @@ def view_menu():
         cursor.execute("SELECT * FROM MenuItems WHERE restaurant_id=?", (restaurant_id,))
         menu_items = cursor.fetchall()
 
+        # Debugging: Print the retrieved menu items
+        print(f"Retrieved menu items: {menu_items}")
+
         # Verbindung schließen
         conn.close()
 
         return render_template('view_menu.html', menu_items=menu_items)
 
     return redirect(url_for('login_restaurant'))
-                
+               
 UPLOAD_FOLDER = 'D:/Suleiman/DB/Lieferspatz/.venv/static/Uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
@@ -214,6 +219,7 @@ def allowed_file(filename):
 @app.route('/add_item', methods=['GET', 'POST'])
 def add_menu_item():
     if 'restaurant_id' in session:
+        file_path = None  # Initialize file_path
         if request.method == 'POST':
             name = request.form['name']
             description = request.form['description']
@@ -276,6 +282,9 @@ def edit_menu_item(item_id):
         conn = sqlite3.connect('mydatabase.db')
         cursor = conn.cursor()
 
+        # Initialize file_path with None
+        file_path = None
+
         if request.method == 'POST':
             name = request.form['name']
             description = request.form['description']
@@ -326,7 +335,21 @@ def dashboard_user():
 def dashboard_restaurant():
     if 'restaurant_id' in session:
         restaurant_id = session['restaurant_id']
-        return render_template('dashboard_restaurant.html', restaurant_id=restaurant_id)
+
+        conn= sqlite3.connect('mydatabase.db')
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT name FROM Restaurants WHERE id=?", (restaurant_id,))
+        restaurant = cursor.fetchone()
+        
+
+        conn.close()
+
+        if restaurant:
+            restaurant_name = restaurant[0]
+            session['restaurant_name'] = restaurant_name
+        return render_template('dashboard_restaurant.html', restaurant_name=restaurant_name)
+  
     return redirect(url_for('login_restaurant'))
 
 

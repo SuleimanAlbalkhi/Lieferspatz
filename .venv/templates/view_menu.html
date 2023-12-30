@@ -4,7 +4,7 @@
     <title>Speisekarte</title>
 </head>
 <body>
-  
+    <a href="{{ url_for('login_restaurant') }}"> Zurück zu Login </a>
     <h1>Speisekarte</h1>
 
     {% if menu_items %}
@@ -26,6 +26,7 @@
     
     <!-- Link zum Hinzufügen neuer Items -->
     <a href="{{ url_for('add_menu_item') }}">Neues Item hinzufügen</a>
+    
 
 </body>
 </html>

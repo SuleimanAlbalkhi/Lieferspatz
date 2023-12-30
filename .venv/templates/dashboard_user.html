@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+</head>
+<body>
+    <h1>Welcome, {{ user[1] }}!</h1>
+    
+    <h2>Available Restaurants in Your Area</h2>
+    {% if restaurants %}
+        <ul>
+            {% for restaurant in restaurants %}
+                <li>
+                    <h3><a href="{{ url_for('restaurant_detail', restaurant_id=restaurant[0]) }}">{{ restaurant[1] }}</a></h3>
+                    <p>{{ restaurant[2] }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No restaurants available in your area at the moment.</p>
+    {% endif %}
+
+    <!-- Add other user dashboard content as needed -->
+</body>
+</html>

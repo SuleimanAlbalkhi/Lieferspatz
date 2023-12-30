@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Detail</title>
+</head>
+<body>
+    <h1>{{ restaurant.name }}</h1>
+    <p>{{ restaurant.description }}</p>
+    
+    <h2>Menu Items</h2>
+    <ul>
+        {% for item in menu_items %}
+            <li>
+                <strong>{{ item.name }}</strong>
+                <p>{{ item.description }}</p>
+                <p>Price: {{ item.price }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Display other restaurant details, such as opening times, etc. -->
+</body>
+</html>

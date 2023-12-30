@@ -17,9 +17,6 @@
         <label for="address">Address:</label>
         <input type="text" name="address" required>
         <br>
-        <label for="postal_code">Postal Code:</label>
-        <input type="text" name="postal_code" required>
-        <br>
         <label for="description">Description:</label>
         <input type="text" name="description">
         <br>
@@ -35,8 +32,8 @@
         <label for="closing_time">Closing Time:</label>
         <input type="time" name="closing_time" required>
         <br>
-        <label for="delivery_radius">Delivery Radius in KM:</label>
-        <input type="text" name="delivery_radius" required>
+        <label for="delivery_radius">Delivery Radius (Enter postal codes separated by new lines):</label>
+        <textarea name="delivery_radius" rows="4" required></textarea>
         <br>
         <input type="submit" value="Register">
     </form>

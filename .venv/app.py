@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session,flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -19,13 +19,12 @@ cursor.execute('''
         name TEXT NOT NULL,
         username TEXT NOT NULL,
         address TEXT NOT NULL,
-        postal_code INTEGER NOT NULL,
         description TEXT,
         image_path TEXT,
         password_hash TEXT NOT NULL,
         opening_time TIME  NOT NULL,
         closing_time TIME  NOT NULL,
-        delivery_radius TEXT NOT NULL
+        delivery_radius TEXT
     )
 ''')
 
@@ -107,7 +106,7 @@ def login_restaurant():
         restaurant = cursor.fetchone()
 
         # Überprüfen, ob das Restaurant existiert und das Passwort korrekt ist
-        if restaurant and check_password_hash(restaurant[7], password):
+        if restaurant and check_password_hash(restaurant[6], password):
             session['restaurant_id'] = restaurant[0]
 
             return redirect(url_for('dashboard_restaurant'))
@@ -154,13 +153,18 @@ def register_restaurant():
         name = request.form['name']
         username = request.form['username']
         address = request.form['address']
-        postal_code = request.form['postal_code']
         description = request.form['description']
         image_path = request.form['image_path']
         password = request.form['password']
         opening_time = request.form['opening_time']
         closing_time = request.form['closing_time']
         delivery_radius = request.form['delivery_radius']
+
+        # Split the comma-separated string into a list of permissible postal codes
+        delivery_radius_list = [code.strip() for code in delivery_radius.split('/n')]
+
+        # Convert the list to a comma-separated string for storage in the database
+        delivery_radius_str = ','.join(delivery_radius_list)
 
         # Passwort hashen
         password_hash = generate_password_hash(password)
@@ -170,15 +174,17 @@ def register_restaurant():
         cursor = conn.cursor()
 
         # Restaurant in die Datenbank einfügen
-        cursor.execute("INSERT INTO Restaurants (name, address, username, description, image_path, password_hash, opening_time, closing_time, delivery_radius, postal_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-               (name, address, username, description, image_path, password_hash, opening_time, closing_time, delivery_radius, postal_code))
+        # Restaurant in die Datenbank einfügen
+        cursor.execute("INSERT INTO Restaurants (name, address, username, description, image_path, password_hash, opening_time, closing_time, delivery_radius) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        (name, address, username, description, image_path, password_hash, opening_time, closing_time, delivery_radius or ''))
+
 
 
         # Änderungen speichern und Verbindung schließen
         conn.commit()
         conn.close()
 
-
+        
         return redirect(url_for('login_restaurant'))
 
     return render_template('register_restaurant.html')
@@ -323,34 +329,143 @@ def edit_menu_item(item_id):
     return redirect(url_for('login_restaurant'))
 
 
-# Dashboard für angemeldete Benutzer
-@app.route('/dashboard/user')
-def dashboard_user():
-    if 'user_id' in session:
-        return f'Welcome, User! Your user ID is {session["user_id"]}'
-    return redirect(url_for('login_user'))
 
-# Dashboard für angemeldete Restaurants
+
+@app.route('/delete_restaurant/<int:restaurant_id>', methods=['GET'])
+def delete_restaurant(restaurant_id):
+    # Check if the user is logged in and has a restaurant ID in the session
+    if 'restaurant_id' in session:
+        logged_in_restaurant_id = session['restaurant_id']
+
+        # Check if the logged-in restaurant ID matches the restaurant ID to be deleted
+        if logged_in_restaurant_id == restaurant_id:
+            # Connect to the database
+            conn = sqlite3.connect('mydatabase.db')
+            cursor = conn.cursor()
+
+            # Delete the restaurant from the database
+            cursor.execute("DELETE FROM Restaurants WHERE id=?", (restaurant_id,))
+
+            # Save changes and close the connection
+            conn.commit()
+            conn.close()
+
+            # Flash message (optional)
+            flash('The restaurant has been successfully deleted.', 'success')
+
+            # Redirect to the home page or another page after deletion
+            return redirect(url_for('welcome'))
+
+    # If the conditions are not met, redirect the user to another page or display an error message
+    return redirect(url_for('login_restaurant'))
+
+
+
+# Dashboard for logged-in Restaurants
 @app.route('/dashboard/restaurant')
 def dashboard_restaurant():
     if 'restaurant_id' in session:
         restaurant_id = session['restaurant_id']
 
-        conn= sqlite3.connect('mydatabase.db')
+        conn = sqlite3.connect('mydatabase.db')
         cursor = conn.cursor()
 
-        cursor.execute("SELECT name FROM Restaurants WHERE id=?", (restaurant_id,))
+        # Fetch necessary information for the dashboard
+        cursor.execute("SELECT id, name FROM Restaurants WHERE id=?", (restaurant_id,))
         restaurant = cursor.fetchone()
-        
 
         conn.close()
 
+        restaurant_info = None  # Default value in case the restaurant is not found or there's an issue
         if restaurant:
-            restaurant_name = restaurant[0]
-            session['restaurant_name'] = restaurant_name
-        return render_template('dashboard_restaurant.html', restaurant_name=restaurant_name)
-  
+            restaurant_info = {
+                'id': restaurant[0],
+                'name': restaurant[1],
+            }
+            session['restaurant_name'] = restaurant_info['name']
+
+        return render_template('dashboard_restaurant.html', restaurant_info=restaurant_info)
+
     return redirect(url_for('login_restaurant'))
+
+
+
+
+def query_restaurants_by_postal_code(postal_code):
+    # Connect to the database and retrieve restaurants based on postal code
+    with sqlite3.connect('mydatabase.db') as conn:
+        cursor = conn.cursor()
+
+        # Adjust the query according to your Restaurants table structure
+        cursor.execute("SELECT * FROM Restaurants")
+        restaurants = cursor.fetchall()
+
+        filtered_restaurants = []
+
+        for restaurant in restaurants:
+            # Assuming the delivery radius is in the 10th column
+            delivery_radius_str = restaurant[9]
+            delivery_radius_list = delivery_radius_str.split(',')
+
+            # Debugging: Print relevant information for each restaurant
+            print(f"User's Postal Code: {postal_code}")
+            print(f"Delivery Radius List for Restaurant ID {restaurant[0]}: {delivery_radius_list}")
+
+            # Check if the user's postal code is in the delivery radius
+            if postal_code in delivery_radius_list:
+                print(f"User's Postal Code {postal_code} is in the Delivery Radius")
+                filtered_restaurants.append(restaurant)
+            else:
+                print(f"User's Postal Code {postal_code} is NOT in the Delivery Radius")
+
+    return filtered_restaurants
+
+
+
+
+
+# Route to display the details of a specific restaurant
+@app.route('/restaurant/<int:restaurant_id>', methods=['GET'])
+def restaurant_detail(restaurant_id):
+    if 'user_id' in session:
+        # Query the database to get information about the selected restaurant
+        # Adjust the query according to your data model
+        restaurant = query_restaurant_by_id(restaurant_id)
+        menu_items = query_menu_items_by_restaurant_id(restaurant_id)
+        if restaurant:
+            return render_template('restaurant_detail.html', restaurant=restaurant, menu_items=menu_items)
+    return redirect(url_for('login_user'))
+
+def get_user_by_id(user_id):
+    # Connect to the database and retrieve the user by ID
+    conn = sqlite3.connect('mydatabase.db')
+    cursor = conn.cursor()
+
+    # Adjust the query according to your Users table structure
+    cursor.execute("SELECT * FROM Users WHERE id=?", (user_id,))
+    user = cursor.fetchone()
+
+    # Close the database connection
+    conn.close()
+
+    return user
+
+# Dashboard für angemeldete Benutzer
+@app.route('/dashboard/user')
+def dashboard_user():
+    if 'user_id' in session:
+        user_id = session['user_id']
+
+        # Assuming you have a User model with a postal_code field
+        user = get_user_by_id(user_id)
+        if user:
+            user_postal_code = user[4] if user and len(user) > 4 else None
+            # Query restaurants based on user postal code and opening times
+            restaurants = query_restaurants_by_postal_code(user_postal_code)
+            return render_template('dashboard_user.html', user=user, restaurants=restaurants)
+
+    return redirect(url_for('login_user'))
+
 
 
 

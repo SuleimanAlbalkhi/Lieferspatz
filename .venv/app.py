@@ -35,7 +35,7 @@ cursor.execute('''
         last_name TEXT NOT NULL,
         username TEXT NOT NULL,
         address TEXT NOT NULL,
-        postal_code INTEGER NOT NULL,
+        postal_code INTEGER  NOT NULL,
         password_hash TEXT NOT NULL
     )
 ''')
@@ -173,8 +173,7 @@ def register_restaurant():
         conn = sqlite3.connect('mydatabase.db')
         cursor = conn.cursor()
 
-        # Restaurant in die Datenbank einfügen
-        # Restaurant in die Datenbank einfügen
+        
         cursor.execute("INSERT INTO Restaurants (name, address, username, description, image_path, password_hash, opening_time, closing_time, delivery_radius) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         (name, address, username, description, image_path, password_hash, opening_time, closing_time, delivery_radius or ''))
 
@@ -390,7 +389,6 @@ def dashboard_restaurant():
 
 
 
-
 def query_restaurants_by_postal_code(postal_code):
     # Connect to the database and retrieve restaurants based on postal code
     with sqlite3.connect('mydatabase.db') as conn:
@@ -405,31 +403,39 @@ def query_restaurants_by_postal_code(postal_code):
         for restaurant in restaurants:
             # Assuming the delivery radius is in the 10th column
             delivery_radius_str = restaurant[9]
-            delivery_radius_list = delivery_radius_str.split(',')
+            delivery_radius_list = [code.strip() for code in delivery_radius_str.replace('\r\n', ',').split(',')]
 
             # Debugging: Print relevant information for each restaurant
             print(f"User's Postal Code: {postal_code}")
+            print(f"Restaurant ID: {restaurant[0]}")
             print(f"Delivery Radius List for Restaurant ID {restaurant[0]}: {delivery_radius_list}")
 
             # Check if the user's postal code is in the delivery radius
             if postal_code in delivery_radius_list:
-                print(f"User's Postal Code {postal_code} is in the Delivery Radius")
+                print(f"User's Postal Code {postal_code} is in the Delivery Radius for Restaurant ID {restaurant[0]}")
                 filtered_restaurants.append(restaurant)
             else:
-                print(f"User's Postal Code {postal_code} is NOT in the Delivery Radius")
+                print(f"User's Postal Code {postal_code} is NOT in the Delivery Radius for Restaurant ID {restaurant[0]}")
 
     return filtered_restaurants
 
 
+def query_menu_items_by_restaurant_id(restaurant_id):
+    # Connect to the database and retrieve menu items based on restaurant ID
+    with sqlite3.connect('mydatabase.db') as conn:
+        cursor = conn.cursor()
 
+        # Adjust the query according to your MenuItems table structure
+        cursor.execute("SELECT * FROM MenuItems WHERE restaurant_id=?", (restaurant_id,))
+        menu_items = cursor.fetchall()
 
+    return menu_items
 
 # Route to display the details of a specific restaurant
 @app.route('/restaurant/<int:restaurant_id>', methods=['GET'])
 def restaurant_detail(restaurant_id):
     if 'user_id' in session:
         # Query the database to get information about the selected restaurant
-        # Adjust the query according to your data model
         restaurant = query_restaurant_by_id(restaurant_id)
         menu_items = query_menu_items_by_restaurant_id(restaurant_id)
         if restaurant:
@@ -450,21 +456,48 @@ def get_user_by_id(user_id):
 
     return user
 
+def query_restaurant_by_id(restaurant_id):
+    # Connect to the database and retrieve restaurant information based on ID
+    with sqlite3.connect('mydatabase.db') as conn:
+        cursor = conn.cursor()
+
+        # Adjust the query according to your Restaurants table structure
+        cursor.execute("SELECT * FROM Restaurants WHERE id=?", (restaurant_id,))
+        restaurant = cursor.fetchone()
+
+    return restaurant    
+
 # Dashboard für angemeldete Benutzer
 @app.route('/dashboard/user')
 def dashboard_user():
     if 'user_id' in session:
         user_id = session['user_id']
-
         # Assuming you have a User model with a postal_code field
         user = get_user_by_id(user_id)
+
+        # Debugging: Print relevant information for the user
+        print(f"User ID: {user_id}")
+        print(f"User Data: {user}")
+
         if user:
-            user_postal_code = user[4] if user and len(user) > 4 else None
+            user_postal_code = user[5] if user and len(user) > 4 else None
+
+            # Debugging: Print relevant information for the user's postal code
+            print(f"User's Original Postal Code: {user_postal_code}")
+
+            # Normalize user's postal code to contain only digits
+            normalized_user_postal_code = ''.join(filter(str.isdigit, str(user_postal_code)))
+
+            # Debugging: Print relevant information for the normalized user's postal code
+            print(f"User's Normalized Postal Code: {normalized_user_postal_code}")
+
             # Query restaurants based on user postal code and opening times
-            restaurants = query_restaurants_by_postal_code(user_postal_code)
+            restaurants = query_restaurants_by_postal_code(normalized_user_postal_code)
             return render_template('dashboard_user.html', user=user, restaurants=restaurants)
 
+
     return redirect(url_for('login_user'))
+
 
 
 

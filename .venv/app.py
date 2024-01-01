@@ -3,6 +3,7 @@ import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -49,6 +50,22 @@ cursor.execute('''
         price FLOAT NOT NULL,
         image_path TEXT,
         FOREIGN KEY(restaurant_id) REFERENCES Restaurants(id)
+    )
+''')
+
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS Orders (
+        id INTEGER PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        restaurant_id INTEGER NOT NULL,
+        item_id INTEGER NOT NULL,
+        quantity INTEGER NOT NULL,
+        note TEXT,
+        total_price FLOAT NOT NULL,
+        order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(user_id) REFERENCES Users(id),
+        FOREIGN KEY(restaurant_id) REFERENCES Restaurants(id),
+        FOREIGN KEY(item_id) REFERENCES MenuItems(id)
     )
 ''')
 
@@ -394,6 +411,8 @@ def query_restaurants_by_postal_code(postal_code):
     with sqlite3.connect('mydatabase.db') as conn:
         cursor = conn.cursor()
 
+        current_time = datetime.now().time()
+
         # Adjust the query according to your Restaurants table structure
         cursor.execute("SELECT * FROM Restaurants")
         restaurants = cursor.fetchall()
@@ -405,17 +424,18 @@ def query_restaurants_by_postal_code(postal_code):
             delivery_radius_str = restaurant[9]
             delivery_radius_list = [code.strip() for code in delivery_radius_str.replace('\r\n', ',').split(',')]
 
-            # Debugging: Print relevant information for each restaurant
-            print(f"User's Postal Code: {postal_code}")
-            print(f"Restaurant ID: {restaurant[0]}")
-            print(f"Delivery Radius List for Restaurant ID {restaurant[0]}: {delivery_radius_list}")
+
+            # opening and closing times
+            opening_time_str = restaurant[7]
+            closing_time_str = restaurant[8]
+
+            opening_time = datetime.strptime(opening_time_str, '%H:%M').time()
+            closing_time = datetime.strptime(closing_time_str, '%H:%M').time()
 
             # Check if the user's postal code is in the delivery radius
-            if postal_code in delivery_radius_list:
-                print(f"User's Postal Code {postal_code} is in the Delivery Radius for Restaurant ID {restaurant[0]}")
+            if postal_code in delivery_radius_list and opening_time <= current_time <= closing_time:
                 filtered_restaurants.append(restaurant)
-            else:
-                print(f"User's Postal Code {postal_code} is NOT in the Delivery Radius for Restaurant ID {restaurant[0]}")
+            
 
     return filtered_restaurants
 
@@ -499,8 +519,167 @@ def dashboard_user():
     return redirect(url_for('login_user'))
 
 
+@app.route('/add_to_cart/<int:restaurant_id>/<int:item_id>', methods=['POST'])
+def add_to_cart(restaurant_id, item_id):
+    if 'user_id' in session:
+        user_id = session['user_id']
+        quantity = int(request.form.get('quantity', 1))
+
+        # Connect to the database
+        conn = sqlite3.connect('mydatabase.db')
+        cursor = conn.cursor()
+
+        # Retrieve menu item details
+        cursor.execute("SELECT * FROM MenuItems WHERE id=?", (item_id,))
+        menu_item = cursor.fetchone()
+
+        if menu_item:
+            # Add item to the user's cart in the session
+            cart_key = f"cart_{user_id}"
+            cart = session.get(cart_key, [])
+            cart.append({
+                'restaurant_id': restaurant_id,
+                'item_id': item_id,
+                'name': menu_item[2],
+                'price': menu_item[4],
+                'quantity': quantity,
+            })
+            session[cart_key] = cart
+
+            flash(f'{quantity} {menu_item[2]} added to your cart.', 'success')
+
+        # Close the database connection
+        conn.close()
+
+    return redirect(url_for('restaurant_detail', restaurant_id=restaurant_id))
 
 
+def calculate_total_price(cart_items):
+    total_price = sum(item['price'] * item['quantity'] for item in cart_items)
+    return total_price
+
+# Cart Overview Route
+@app.route('/cart_overview', methods=['GET', 'POST'])
+def cart_overview():
+    if 'user_id' in session:
+        user_id = session['user_id']
+
+        # Connect to the database
+        conn = sqlite3.connect('mydatabase.db')
+        cursor = conn.cursor()
+
+        # Retrieve cart items from the session
+        cart_key = f"cart_{user_id}"
+        cart = session.get(cart_key, [])
+
+        # Fetch menu item details for items in the cart
+        cart_items = []
+        total_price = 0
+        for item in cart:
+            cursor.execute("SELECT * FROM MenuItems WHERE id=?", (item['item_id'],))
+            menu_item = cursor.fetchone()
+            if menu_item:
+                total_price += menu_item[4] * item['quantity']
+                cart_items.append({
+                    'id': item['item_id'],  # Add item id to identify items uniquely
+                    'name': menu_item[2],
+                    'price': menu_item[4],
+                    'quantity': item['quantity'],
+                })
+
+        # Handle updates, removals, and order placement
+        if request.method == 'POST':
+            action = request.form.get('action')
+
+            if action == 'update':
+                item_id = int(request.form.get('item_id'))
+                new_quantity = int(request.form.get('quantity'))
+                
+                # Update the quantity in the session
+                for item in cart:
+                    if item['item_id'] == item_id:
+                        item['quantity'] = new_quantity
+                        break
+
+                flash('Cart updated successfully!', 'success')
+
+            elif action == 'remove':
+                item_id = int(request.form.get('item_id'))
+                
+                # Remove the item from the cart in the session
+                cart = [item for item in cart if item['item_id'] != item_id]
+
+                flash('Item removed from the cart!', 'success')
+
+            elif action == 'place_order':
+                additional_notes = request.form.get('additional_notes')
+
+                # Check if the cart is not empty
+                if cart:
+                    # Fetch restaurant_id based on the items in the cart
+                    restaurant_id = get_restaurant_id_for_cart(cart)
+
+                    # Insert the order into the Orders table
+                    cursor.executemany('''
+                        INSERT INTO Orders (user_id, restaurant_id, item_id, quantity, note, total_price)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    ''', [(user_id, restaurant_id, item['item_id'], item['quantity'], additional_notes, total_price) for item in cart])
+
+                    # Commit the changes to the database
+                    conn.commit()
+
+                    # Clear the cart in the session
+                    session.pop(cart_key, None)
+
+                    flash('Order placed successfully!', 'success')
+                else:
+                    flash('Your cart is empty. Add items before placing an order.', 'error')
+
+                # Redirect to the thank you page after placing an order
+                return redirect(url_for('thank_you'))
+
+            # Save the updated cart back to the session
+            session[cart_key] = cart
+
+            # Redirect to avoid form resubmission on refresh
+            return redirect(url_for('cart_overview'))
+
+        # Close the database connection
+        conn.close()
+
+        return render_template('cart_overview.html', cart_items=cart_items, total_price=total_price)
+
+    return redirect(url_for('login_user'))
+
+@app.route('/thank_you')
+def thank_you():
+    return render_template('thank_you.html')
+
+
+def get_restaurant_id_for_cart(cart):
+    # Connect to the database
+    conn = sqlite3.connect('mydatabase.db')
+    cursor = conn.cursor()
+
+    try:
+        # Check if the cart is not empty
+        if cart:
+            first_item_id = cart[0]['item_id']
+
+            # Fetch restaurant_id based on the items in the cart
+            cursor.execute("SELECT restaurant_id FROM MenuItems WHERE id=?", (first_item_id,))
+            restaurant_id = cursor.fetchone()[0]
+
+            return restaurant_id
+        else:
+            return None
+    finally:
+        # Close the database connection in the finally block
+        conn.close()
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
+    
+
+    

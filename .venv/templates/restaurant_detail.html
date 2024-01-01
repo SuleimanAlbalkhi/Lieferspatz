@@ -16,10 +16,18 @@
     <ul>
         {% for item in menu_items %}
             <li>
-                <strong>{{ item[2] }}</strong> - {{ item[3] }} - ${{ item[4] }}
+                <form method="post" action="{{ url_for('add_to_cart', restaurant_id=restaurant[0], item_id=item[0]) }}">
+                    <strong>{{ item[2] }}</strong> - {{ item[3] }} - ${{ item[4] }}
+                    <label for="quantity">Quantity:</label>
+                    <input type="number" id="quantity" name="quantity" value="1" min="1">
+                    <button type="submit">Add to Cart</button>
+                </form>
             </li>
         {% endfor %}
     </ul>
+
+    <!-- Link to Cart Overview -->
+    <a href="{{ url_for('cart_overview') }}">View Cart</a>
 
     <a href="{{ url_for('dashboard_user') }}">Back to Dashboard</a>
 </body>

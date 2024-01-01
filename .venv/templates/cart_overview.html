@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart Overview</title>
+</head>
+<body>
+    <h1>Your Cart</h1>
+
+    {% if cart_items %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                    <tr>
+                        <td>{{ item['name'] }}</td>
+                        <td>${{ item['price'] }}</td>
+                        <td>
+                            <form method="post" action="{{ url_for('cart_overview') }}">
+                                <input type="hidden" name="action" value="update">
+                                <input type="hidden" name="item_id" value="{{ item['id'] }}">
+                                <input type="number" name="quantity" value="{{ item['quantity'] }}" min="1">
+                                <button type="submit">Update</button>
+                            </form>
+                        </td>
+                        <td>${{ item['price'] * item['quantity'] }}</td>
+                        <td>
+                            <form method="post" action="{{ url_for('cart_overview') }}">
+                                <input type="hidden" name="action" value="remove">
+                                <input type="hidden" name="item_id" value="{{ item['id'] }}">
+                                <button type="submit">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3"><strong>Total</strong></td>
+                    <td colspan="2">${{ total_price }}</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <form method="post" action="{{ url_for('cart_overview') }}">
+            <input type="hidden" name="action" value="place_order">
+            <label for="additional_notes">Additional Notes:</label>
+            <textarea id="additional_notes" name="additional_notes" rows="4" cols="50"></textarea>
+            <button type="submit">Place Order</button>
+        </form>
+    {% else %}
+        <p>Your cart is empty.</p>
+    {% endif %}
+
+    <a href="{{ url_for('dashboard_user') }}">Back to Dashboard</a>
+</body>
+</html>

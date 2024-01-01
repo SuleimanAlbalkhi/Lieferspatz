@@ -6,6 +6,7 @@
     <title>User Dashboard</title>
 </head>
 <body>
+    <a href="{{ url_for('login_user') }}"> Zurück zu Login </a>
     <h1>Welcome, {{ user[1] }}!</h1>
     
     <h2>Available Restaurants in Your Area</h2>
@@ -14,7 +15,7 @@
             {% for restaurant in restaurants %}
                 <li>
                     <h3><a href="{{ url_for('restaurant_detail', restaurant_id=restaurant[0]) }}">{{ restaurant[1] }}</a></h3>
-                    <p>{{ restaurant[2] }}</p>
+                    <p>{{ restaurant[4] }}</p>
                 </li>
             {% endfor %}
         </ul>

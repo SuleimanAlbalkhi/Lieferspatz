@@ -3,6 +3,7 @@ import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -394,6 +395,8 @@ def query_restaurants_by_postal_code(postal_code):
     with sqlite3.connect('mydatabase.db') as conn:
         cursor = conn.cursor()
 
+        current_time = datetime.now().time()
+
         # Adjust the query according to your Restaurants table structure
         cursor.execute("SELECT * FROM Restaurants")
         restaurants = cursor.fetchall()
@@ -405,17 +408,18 @@ def query_restaurants_by_postal_code(postal_code):
             delivery_radius_str = restaurant[9]
             delivery_radius_list = [code.strip() for code in delivery_radius_str.replace('\r\n', ',').split(',')]
 
-            # Debugging: Print relevant information for each restaurant
-            print(f"User's Postal Code: {postal_code}")
-            print(f"Restaurant ID: {restaurant[0]}")
-            print(f"Delivery Radius List for Restaurant ID {restaurant[0]}: {delivery_radius_list}")
+
+            # opening and closing times
+            opening_time_str = restaurant[7]
+            closing_time_str = restaurant[8]
+
+            opening_time = datetime.strptime(opening_time_str, '%H:%M').time()
+            closing_time = datetime.strptime(closing_time_str, '%H:%M').time()
 
             # Check if the user's postal code is in the delivery radius
-            if postal_code in delivery_radius_list:
-                print(f"User's Postal Code {postal_code} is in the Delivery Radius for Restaurant ID {restaurant[0]}")
+            if postal_code in delivery_radius_list and opening_time <= current_time <= closing_time:
                 filtered_restaurants.append(restaurant)
-            else:
-                print(f"User's Postal Code {postal_code} is NOT in the Delivery Radius for Restaurant ID {restaurant[0]}")
+            
 
     return filtered_restaurants
 

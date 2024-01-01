@@ -5,6 +5,7 @@
     <title>Restaurant Dashboard</title>
 </head>
 <body>
+    <a href="{{ url_for('login_restaurant') }}"> Zurück zu Login </a>
     <h1>Welcome, {{ restaurant_info['name'] }}!</h1>
     <!-- Link zur Speisekarte hinzufügen -->
     <a href="{{ url_for('view_menu') }}">Go to Menu</a>

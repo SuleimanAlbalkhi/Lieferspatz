@@ -63,11 +63,13 @@ cursor.execute('''
         note TEXT,
         total_price FLOAT NOT NULL,
         order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        status Text;
         FOREIGN KEY(user_id) REFERENCES Users(id),
         FOREIGN KEY(restaurant_id) REFERENCES Restaurants(id),
         FOREIGN KEY(item_id) REFERENCES MenuItems(id)
     )
 ''')
+
 
 # Änderungen speichern und Verbindung schließen
 conn.commit()

@@ -232,13 +232,7 @@ def view_menu():
 
     return redirect(url_for('login_restaurant'))
                
-UPLOAD_FOLDER = 'D:/Suleiman/DB/Lieferspatz/.venv/static/Uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/add_item', methods=['GET', 'POST'])
 def add_menu_item():
@@ -249,15 +243,7 @@ def add_menu_item():
             description = request.form['description']
             price = request.form['price']
 
-            # Bild-Upload verarbeiten
-            if 'image' in request.files:
-                file = request.files['image']
-                if file and allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
-                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                    file.save(file_path)
-                else:
-                    flash('Ungültiges Dateiformat für Bild. Nur PNG, JPG, JPEG oder GIF sind erlaubt.', 'error')
+         
 
             # Weitere Informationen zur Datenbank hinzufügen
             restaurant_id = session['restaurant_id']
@@ -314,15 +300,7 @@ def edit_menu_item(item_id):
             description = request.form['description']
             price = request.form['price']
 
-            # Bild-Upload verarbeiten
-            if 'image' in request.files:
-                file = request.files['image']
-                if file and allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
-                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                    file.save(file_path)
-                else:
-                    flash('Ungültiges Dateiformat für Bild. Nur PNG, JPG, JPEG oder GIF sind erlaubt.', 'error')
+            
 
             # Item in der Datenbank aktualisieren
             cursor.execute("UPDATE MenuItems SET name=?, description=?, price=?, image_path=? WHERE id=?",
@@ -560,6 +538,81 @@ def calculate_total_price(cart_items):
     total_price = sum(item['price'] * item['quantity'] for item in cart_items)
     return total_price
 
+
+def get_menu_item_details(item_id):
+    with sqlite3.connect('mydatabase.db') as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM MenuItems WHERE id=?", (item_id,))
+        menu_item = cursor.fetchone()
+
+    return menu_item
+
+# Assuming you have a function to get details of all ordered items for an order
+def get_ordered_items(order_id):
+    with sqlite3.connect('mydatabase.db') as conn:
+        # Enable dictionary-style access for the cursor
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        # Assuming your Orders table has a column named id as the primary key
+        cursor.execute("SELECT * FROM Orders WHERE id=?", (order_id,))
+        order = cursor.fetchone()
+
+    ordered_items = []
+    if order:
+        # Access tuple elements by index
+        item_id = order['item_id']
+        quantity = order['quantity']
+
+        # Fetch menu item details using the item_id
+        menu_item = get_menu_item_details(item_id)
+
+        # Create a dictionary with item details and quantity
+        ordered_item = {
+            'name': menu_item['name'],
+            'price': menu_item['price'],
+            'quantity': quantity,
+        }
+
+        ordered_items.append(ordered_item)
+
+    return ordered_items
+
+
+
+def get_user_orders(user_id):
+    conn = sqlite3.connect('mydatabase.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Orders WHERE user_id=?", (user_id,))
+    orders = cursor.fetchall()
+    conn.close()
+    return orders
+
+
+def get_restaurant_orders(restaurant_id):
+    conn = sqlite3.connect('mydatabase.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Orders WHERE restaurant_id=?", (restaurant_id,))
+    orders = cursor.fetchall()
+    conn.close()
+    return orders
+
+def update_order_status_in_db(order_id, new_status):
+    conn = sqlite3.connect('mydatabase.db')
+    cursor = conn.cursor()
+
+    # Update the order status in the Orders table
+    cursor.execute("UPDATE Orders SET status = ? WHERE id = ?", (new_status, order_id))
+
+    # Commit the changes
+    conn.commit()
+
+    # Close the database connection
+    conn.close()
+
+
 # Cart Overview Route
 @app.route('/cart_overview', methods=['GET', 'POST'])
 def cart_overview():
@@ -623,15 +676,21 @@ def cart_overview():
 
                     # Insert the order into the Orders table
                     cursor.executemany('''
-                        INSERT INTO Orders (user_id, restaurant_id, item_id, quantity, note, total_price)
-                        VALUES (?, ?, ?, ?, ?, ?)
-                    ''', [(user_id, restaurant_id, item['item_id'], item['quantity'], additional_notes, total_price) for item in cart])
+                        INSERT INTO Orders (user_id, restaurant_id, item_id, quantity, note, total_price, status)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ''', [(user_id, restaurant_id, item['item_id'], item['quantity'], additional_notes, total_price, 'In Bearbeitung') for item in cart])
 
                     # Commit the changes to the database
                     conn.commit()
 
+                    # Fetch the order_id after inserting into the Orders table
+                    order_id = cursor.lastrowid
+
                     # Clear the cart in the session
                     session.pop(cart_key, None)
+
+                    # Update the order status to "In Bearbeitung"
+                    update_order_status_route(order_id, 'In Bearbeitung')
 
                     flash('Order placed successfully!', 'success')
                 else:
@@ -652,6 +711,86 @@ def cart_overview():
         return render_template('cart_overview.html', cart_items=cart_items, total_price=total_price)
 
     return redirect(url_for('login_user'))
+
+
+def get_order_status(order_id):
+    conn = sqlite3.connect('mydatabase.db')  # Replace with your actual database name
+    cursor = conn.cursor()
+
+    # Assuming your Orders table has columns 'id' and 'status'
+    cursor.execute("SELECT status FROM Orders WHERE id = ?", (order_id,))
+    result = cursor.fetchone()
+
+    # Close the database connection
+    conn.close()
+
+    if result:
+        return result[0]  # Assuming the status is in the first column of the result
+    else:
+        return "Order Status Not Found"
+
+
+
+@app.route('/customer_orders')
+def customer_orders():
+    if 'user_id' in session:
+        user_id = session['user_id']
+        orders = get_user_orders(user_id)
+        orders_with_status = []
+
+        for order in orders:
+            order_id = order[0]
+            status = get_order_status(order_id)  # Ensure this function is defined
+            ordered_items = get_ordered_items(order_id)
+            orders_with_status.append((order, status, ordered_items))
+
+        return render_template('customer_orders.html', orders_with_status=orders_with_status)
+
+    return redirect(url_for('login_user'))
+
+# Restaurant Orders Route
+@app.route('/restaurant_orders')
+def restaurant_orders():
+    if 'restaurant_id' in session:
+        restaurant_id = session['restaurant_id']
+        orders = get_restaurant_orders(restaurant_id)
+
+        orders_with_items = []
+
+        for order in orders:
+            order_id = order[0]
+            ordered_items = get_ordered_items(order_id)
+            orders_with_items.append({'order_details': order, 'ordered_items': ordered_items})
+
+        return render_template('restaurant_orders.html', orders_with_items=orders_with_items)
+
+    return redirect(url_for('login_user'))
+
+
+# Updated Flask route
+@app.route('/update_order_status_route', methods=['POST'])
+def update_order_status_route():
+    if 'restaurant_id' in session:
+        restaurant_id = session['restaurant_id']
+
+        order_id = request.form.get('order_id')
+        if isinstance(order_id, tuple):
+            order_id = order_id[0]
+
+        try:
+            order_id = int(order_id)
+        except ValueError:
+            return "Invalid order ID"    
+        new_status = request.form.get('new_status')
+
+        update_order_status_in_db(order_id, new_status)
+        flash('Order status updated successfully!', 'success')
+
+        return redirect(url_for('restaurant_orders'))
+
+    return redirect(url_for('login_user'))
+
+
 
 @app.route('/thank_you')
 def thank_you():

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History</title>
+</head>
+<body>
+    <h1>Order History</h1>
+
+    {% if orders_with_status %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>User ID</th>
+                    <th>Order Date</th>
+                    <th>Total Price</th>
+                    <th>Status</th>
+                    <th>Ordered Items</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order, status, ordered_items in orders_with_status %}
+                    <tr>
+                        <td>{{ order[0] }}</td>
+                        <td>{{ order[1] }}</td>
+                        <td>{{ order[7] }}</td>
+                        <td>${{ order[6] }}</td>
+                        <td>{{ status }}</td>
+                        <td>
+                            <ul>
+                                {% for item in ordered_items %}
+                                    <li>{{ item['name'] }} - Quantity: {{ item['quantity'] }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No order history available.</p>
+    {% endif %}
+
+    <a href="{{ url_for('welcome') }}">Back to Home</a>
+    <a href="{{ url_for('dashboard_user') }}">Back to dashboard</a>
+</body>
+</html>

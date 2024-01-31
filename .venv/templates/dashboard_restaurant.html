@@ -11,5 +11,11 @@
     <a href="{{ url_for('view_menu') }}">Go to Menu</a>
     <br>
     <a href="{{ url_for('delete_restaurant', restaurant_id=restaurant_info['id']) }}">Restaurant löschen</a>
+    <h2>Bestellstatus</h2>
+    <ul>
+        {% for order in orders %}
+            <li>Bestellung ID: {{ order.id }} - Status: {{ order.status }}</li>
+        {% endfor %}
+    </ul>
 </body>
 </html>

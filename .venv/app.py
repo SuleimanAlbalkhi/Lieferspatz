@@ -674,7 +674,7 @@ def cart_overview():
                     # Fetch restaurant_id based on the items in the cart
                     restaurant_id = get_restaurant_id_for_cart(cart)
 
-                    # Insert the order into the Orders table
+                    
                     cursor.executemany('''
                         INSERT INTO Orders (user_id, restaurant_id, item_id, quantity, note, total_price, status)
                         VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -689,7 +689,6 @@ def cart_overview():
                     # Clear the cart in the session
                     session.pop(cart_key, None)
 
-                    # Update the order status to "In Bearbeitung"
                     update_order_status_route(order_id, 'In Bearbeitung')
 
                     flash('Order placed successfully!', 'success')
@@ -702,10 +701,10 @@ def cart_overview():
             # Save the updated cart back to the session
             session[cart_key] = cart
 
-            # Redirect to avoid form resubmission on refresh
+            
             return redirect(url_for('cart_overview'))
 
-        # Close the database connection
+        
         conn.close()
 
         return render_template('cart_overview.html', cart_items=cart_items, total_price=total_price)
@@ -714,18 +713,18 @@ def cart_overview():
 
 
 def get_order_status(order_id):
-    conn = sqlite3.connect('mydatabase.db')  # Replace with your actual database name
+    conn = sqlite3.connect('mydatabase.db')  
     cursor = conn.cursor()
 
-    # Assuming your Orders table has columns 'id' and 'status'
+    
     cursor.execute("SELECT status FROM Orders WHERE id = ?", (order_id,))
     result = cursor.fetchone()
 
-    # Close the database connection
+    
     conn.close()
 
     if result:
-        return result[0]  # Assuming the status is in the first column of the result
+        return result[8]  
     else:
         return "Order Status Not Found"
 
@@ -748,7 +747,7 @@ def customer_orders():
 
     return redirect(url_for('login_user'))
 
-# Restaurant Orders Route
+
 @app.route('/restaurant_orders')
 def restaurant_orders():
     if 'restaurant_id' in session:
@@ -767,7 +766,7 @@ def restaurant_orders():
     return redirect(url_for('login_user'))
 
 
-# Updated Flask route
+
 @app.route('/update_order_status_route', methods=['POST'])
 def update_order_status_route():
     if 'restaurant_id' in session:
@@ -798,16 +797,16 @@ def thank_you():
 
 
 def get_restaurant_id_for_cart(cart):
-    # Connect to the database
+    
     conn = sqlite3.connect('mydatabase.db')
     cursor = conn.cursor()
 
     try:
-        # Check if the cart is not empty
+        
         if cart:
             first_item_id = cart[0]['item_id']
 
-            # Fetch restaurant_id based on the items in the cart
+            
             cursor.execute("SELECT restaurant_id FROM MenuItems WHERE id=?", (first_item_id,))
             restaurant_id = cursor.fetchone()[0]
 
@@ -815,7 +814,7 @@ def get_restaurant_id_for_cart(cart):
         else:
             return None
     finally:
-        # Close the database connection in the finally block
+        
         conn.close()
     
 

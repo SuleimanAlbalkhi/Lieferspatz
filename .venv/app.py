@@ -71,7 +71,7 @@ cursor.execute('''
 ''')
 
 
-# Änderungen speichern und Verbindung schließen
+
 conn.commit()
 conn.close()
 
@@ -94,11 +94,11 @@ def login_user():
         username = request.form['username']
         password = request.form['password']
 
-        # Verbindung zur Datenbank herstellen
+        
         conn = sqlite3.connect('mydatabase.db')
         cursor = conn.cursor()
 
-        # Benutzerdaten abrufen
+        
         cursor.execute("SELECT * FROM Users WHERE username=?", (username,))
         user = cursor.fetchone()
 
@@ -116,11 +116,11 @@ def login_restaurant():
         username = request.form['username']
         password = request.form['password']
 
-        # Verbindung zur Datenbank herstellen
+        
         conn = sqlite3.connect('mydatabase.db')
         cursor = conn.cursor()
 
-        # Restaurantdaten abrufen
+        
         cursor.execute("SELECT * FROM Restaurants WHERE username=?", (username,))
         restaurant = cursor.fetchone()
 
@@ -147,7 +147,7 @@ def register_user():
         password_hash = generate_password_hash(password)
 
 
-        # Verbindung zur Datenbank herstellen
+        
         conn = sqlite3.connect('mydatabase.db')
         cursor = conn.cursor()
 
@@ -156,7 +156,7 @@ def register_user():
                (first_name, last_name, username, address, postal_code, password_hash))
 
 
-        # Änderungen speichern und Verbindung schließen
+        
         conn.commit()
         conn.close()
         
@@ -188,7 +188,7 @@ def register_restaurant():
         # Passwort hashen
         password_hash = generate_password_hash(password)
 
-        # Verbindung zur Datenbank herstellen
+        
         conn = sqlite3.connect('mydatabase.db')
         cursor = conn.cursor()
 
@@ -198,7 +198,7 @@ def register_restaurant():
 
 
 
-        # Änderungen speichern und Verbindung schließen
+        
         conn.commit()
         conn.close()
 
@@ -208,13 +208,13 @@ def register_restaurant():
     return render_template('register_restaurant.html')
 
 
-# In app.py
+
 @app.route('/menu', methods=['GET'])
 def view_menu():
     if session.get('restaurant_id'):
         restaurant_id = session['restaurant_id']
 
-        # Verbindung zur Datenbank herstellen
+        
         conn = sqlite3.connect('mydatabase.db')
         cursor = conn.cursor()
 
@@ -222,10 +222,10 @@ def view_menu():
         cursor.execute("SELECT * FROM MenuItems WHERE restaurant_id=?", (restaurant_id,))
         menu_items = cursor.fetchall()
 
-        # Debugging: Print the retrieved menu items
+        
         print(f"Retrieved menu items: {menu_items}")
 
-        # Verbindung schließen
+        
         conn.close()
 
         return render_template('view_menu.html', menu_items=menu_items)
@@ -237,7 +237,7 @@ def view_menu():
 @app.route('/add_item', methods=['GET', 'POST'])
 def add_menu_item():
     if 'restaurant_id' in session:
-        file_path = None  # Initialize file_path
+        file_path = None  
         if request.method == 'POST':
             name = request.form['name']
             description = request.form['description']
@@ -245,17 +245,17 @@ def add_menu_item():
 
          
 
-            # Weitere Informationen zur Datenbank hinzufügen
+            
             restaurant_id = session['restaurant_id']
 
-            # Verbindung zur Datenbank herstellen
+            
             conn = sqlite3.connect('mydatabase.db')
             cursor = conn.cursor()
 
             cursor.execute("INSERT INTO MenuItems (name, description, price, image_path, restaurant_id) VALUES (?, ?, ?, ?, ?)",
                            (name, description, price, file_path, restaurant_id))
 
-            # Änderungen speichern und Verbindung schließen
+            
             conn.commit()
             conn.close()
 
@@ -268,14 +268,14 @@ def add_menu_item():
 @app.route('/remove_item/<int:item_id>', methods=['GET'])
 def remove_menu_item(item_id):
     if 'restaurant_id' in session:
-        # Verbindung zur Datenbank herstellen
+        
         conn = sqlite3.connect('mydatabase.db')
         cursor = conn.cursor()
 
-        # Item aus der Speisekarte entfernen
+        
         cursor.execute("DELETE FROM MenuItems WHERE id=?", (item_id,))
 
-        # Änderungen speichern und Verbindung schließen
+        
         conn.commit()
         conn.close()
 
@@ -288,11 +288,11 @@ def remove_menu_item(item_id):
 @app.route('/edit_item/<int:item_id>', methods=['GET', 'POST'])
 def edit_menu_item(item_id):
     if 'restaurant_id' in session:
-        # Verbindung zur Datenbank herstellen
+        
         conn = sqlite3.connect('mydatabase.db')
         cursor = conn.cursor()
 
-        # Initialize file_path with None
+        
         file_path = None
 
         if request.method == 'POST':
@@ -302,22 +302,22 @@ def edit_menu_item(item_id):
 
             
 
-            # Item in der Datenbank aktualisieren
+            
             cursor.execute("UPDATE MenuItems SET name=?, description=?, price=?, image_path=? WHERE id=?",
                            (name, description, price, file_path, item_id))
 
-            # Änderungen speichern und Verbindung schließen
+            
             conn.commit()
             conn.close()
 
             flash('Item wurde aktualisiert.', 'success')
             return redirect(url_for('view_menu'))
 
-        # Informationen zum Item abrufen und im Formular anzeigen
+        
         cursor.execute("SELECT * FROM MenuItems WHERE id=?", (item_id,))
         menu_item = cursor.fetchone()
 
-        # Verbindung schließen
+        
         conn.close()
 
         return render_template('edit_menu_item.html', menu_item=menu_item)
@@ -329,30 +329,30 @@ def edit_menu_item(item_id):
 
 @app.route('/delete_restaurant/<int:restaurant_id>', methods=['GET'])
 def delete_restaurant(restaurant_id):
-    # Check if the user is logged in and has a restaurant ID in the session
+    
     if 'restaurant_id' in session:
         logged_in_restaurant_id = session['restaurant_id']
 
-        # Check if the logged-in restaurant ID matches the restaurant ID to be deleted
+        
         if logged_in_restaurant_id == restaurant_id:
-            # Connect to the database
+            
             conn = sqlite3.connect('mydatabase.db')
             cursor = conn.cursor()
 
-            # Delete the restaurant from the database
+            
             cursor.execute("DELETE FROM Restaurants WHERE id=?", (restaurant_id,))
 
-            # Save changes and close the connection
+           
             conn.commit()
             conn.close()
 
-            # Flash message (optional)
+            
             flash('The restaurant has been successfully deleted.', 'success')
 
-            # Redirect to the home page or another page after deletion
+            
             return redirect(url_for('welcome'))
 
-    # If the conditions are not met, redirect the user to another page or display an error message
+    
     return redirect(url_for('login_restaurant'))
 
 
@@ -366,13 +366,13 @@ def dashboard_restaurant():
         conn = sqlite3.connect('mydatabase.db')
         cursor = conn.cursor()
 
-        # Fetch necessary information for the dashboard
+        
         cursor.execute("SELECT id, name FROM Restaurants WHERE id=?", (restaurant_id,))
         restaurant = cursor.fetchone()
 
         conn.close()
 
-        restaurant_info = None  # Default value in case the restaurant is not found or there's an issue
+        restaurant_info = None  
         if restaurant:
             restaurant_info = {
                 'id': restaurant[0],
@@ -387,20 +387,20 @@ def dashboard_restaurant():
 
 
 def query_restaurants_by_postal_code(postal_code):
-    # Connect to the database and retrieve restaurants based on postal code
+   
     with sqlite3.connect('mydatabase.db') as conn:
         cursor = conn.cursor()
 
         current_time = datetime.now().time()
 
-        # Adjust the query according to your Restaurants table structure
+        
         cursor.execute("SELECT * FROM Restaurants")
         restaurants = cursor.fetchall()
 
         filtered_restaurants = []
 
         for restaurant in restaurants:
-            # Assuming the delivery radius is in the 10th column
+            
             delivery_radius_str = restaurant[9]
             delivery_radius_list = [code.strip() for code in delivery_radius_str.replace('\r\n', ',').split(',')]
 
@@ -421,11 +421,11 @@ def query_restaurants_by_postal_code(postal_code):
 
 
 def query_menu_items_by_restaurant_id(restaurant_id):
-    # Connect to the database and retrieve menu items based on restaurant ID
+    
     with sqlite3.connect('mydatabase.db') as conn:
         cursor = conn.cursor()
 
-        # Adjust the query according to your MenuItems table structure
+        
         cursor.execute("SELECT * FROM MenuItems WHERE restaurant_id=?", (restaurant_id,))
         menu_items = cursor.fetchall()
 
@@ -435,7 +435,7 @@ def query_menu_items_by_restaurant_id(restaurant_id):
 @app.route('/restaurant/<int:restaurant_id>', methods=['GET'])
 def restaurant_detail(restaurant_id):
     if 'user_id' in session:
-        # Query the database to get information about the selected restaurant
+        
         restaurant = query_restaurant_by_id(restaurant_id)
         menu_items = query_menu_items_by_restaurant_id(restaurant_id)
         if restaurant:
@@ -443,25 +443,25 @@ def restaurant_detail(restaurant_id):
     return redirect(url_for('login_user'))
 
 def get_user_by_id(user_id):
-    # Connect to the database and retrieve the user by ID
+    
     conn = sqlite3.connect('mydatabase.db')
     cursor = conn.cursor()
 
-    # Adjust the query according to your Users table structure
+    
     cursor.execute("SELECT * FROM Users WHERE id=?", (user_id,))
     user = cursor.fetchone()
 
-    # Close the database connection
+    
     conn.close()
 
     return user
 
 def query_restaurant_by_id(restaurant_id):
-    # Connect to the database and retrieve restaurant information based on ID
+    
     with sqlite3.connect('mydatabase.db') as conn:
         cursor = conn.cursor()
 
-        # Adjust the query according to your Restaurants table structure
+        
         cursor.execute("SELECT * FROM Restaurants WHERE id=?", (restaurant_id,))
         restaurant = cursor.fetchone()
 
@@ -472,7 +472,7 @@ def query_restaurant_by_id(restaurant_id):
 def dashboard_user():
     if 'user_id' in session:
         user_id = session['user_id']
-        # Assuming you have a User model with a postal_code field
+        
         user = get_user_by_id(user_id)
 
         # Debugging: Print relevant information for the user
@@ -482,16 +482,16 @@ def dashboard_user():
         if user:
             user_postal_code = user[5] if user and len(user) > 4 else None
 
-            # Debugging: Print relevant information for the user's postal code
+            
             print(f"User's Original Postal Code: {user_postal_code}")
 
-            # Normalize user's postal code to contain only digits
+            
             normalized_user_postal_code = ''.join(filter(str.isdigit, str(user_postal_code)))
 
-            # Debugging: Print relevant information for the normalized user's postal code
+            
             print(f"User's Normalized Postal Code: {normalized_user_postal_code}")
 
-            # Query restaurants based on user postal code and opening times
+            
             restaurants = query_restaurants_by_postal_code(normalized_user_postal_code)
             return render_template('dashboard_user.html', user=user, restaurants=restaurants)
 
@@ -505,16 +505,16 @@ def add_to_cart(restaurant_id, item_id):
         user_id = session['user_id']
         quantity = int(request.form.get('quantity', 1))
 
-        # Connect to the database
+        
         conn = sqlite3.connect('mydatabase.db')
         cursor = conn.cursor()
 
-        # Retrieve menu item details
+        
         cursor.execute("SELECT * FROM MenuItems WHERE id=?", (item_id,))
         menu_item = cursor.fetchone()
 
         if menu_item:
-            # Add item to the user's cart in the session
+            
             cart_key = f"cart_{user_id}"
             cart = session.get(cart_key, [])
             cart.append({
@@ -528,7 +528,7 @@ def add_to_cart(restaurant_id, item_id):
 
             flash(f'{quantity} {menu_item[2]} added to your cart.', 'success')
 
-        # Close the database connection
+        
         conn.close()
 
     return redirect(url_for('restaurant_detail', restaurant_id=restaurant_id))
@@ -549,14 +549,14 @@ def get_menu_item_details(item_id):
 
     return menu_item
 
-# Assuming you have a function to get details of all ordered items for an order
+
 def get_ordered_items(order_id):
     with sqlite3.connect('mydatabase.db') as conn:
-        # Enable dictionary-style access for the cursor
+        
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
-        # Assuming your Orders table has a column named id as the primary key
+        
         cursor.execute("SELECT * FROM Orders WHERE id=?", (order_id,))
         order = cursor.fetchone()
 
@@ -566,7 +566,7 @@ def get_ordered_items(order_id):
         item_id = order['item_id']
         quantity = order['quantity']
 
-        # Fetch menu item details using the item_id
+        
         menu_item = get_menu_item_details(item_id)
 
         # Create a dictionary with item details and quantity
@@ -603,17 +603,17 @@ def update_order_status_in_db(order_id, new_status):
     conn = sqlite3.connect('mydatabase.db')
     cursor = conn.cursor()
 
-    # Update the order status in the Orders table
+    
     cursor.execute("UPDATE Orders SET status = ? WHERE id = ?", (new_status, order_id))
 
-    # Commit the changes
+    
     conn.commit()
 
-    # Close the database connection
+    
     conn.close()
 
 
-# Cart Overview Route
+
 @app.route('/cart_overview', methods=['GET', 'POST'])
 def cart_overview():
     if 'user_id' in session:
@@ -739,7 +739,7 @@ def customer_orders():
 
         for order in orders:
             order_id = order[0]
-            status = get_order_status(order_id)  # Ensure this function is defined
+            status = get_order_status(order_id)  
             ordered_items = get_ordered_items(order_id)
             orders_with_status.append((order, status, ordered_items))
 

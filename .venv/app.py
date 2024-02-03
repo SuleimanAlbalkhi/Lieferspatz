@@ -619,7 +619,7 @@ def cart_overview():
     if 'user_id' in session:
         user_id = session['user_id']
 
-        # Connect to the database
+        
         conn = sqlite3.connect('mydatabase.db')
         cursor = conn.cursor()
 
@@ -636,13 +636,13 @@ def cart_overview():
             if menu_item:
                 total_price += menu_item[4] * item['quantity']
                 cart_items.append({
-                    'id': item['item_id'],  # Add item id to identify items uniquely
+                    'id': item['item_id'],  
                     'name': menu_item[2],
                     'price': menu_item[4],
                     'quantity': item['quantity'],
                 })
 
-        # Handle updates, removals, and order placement
+        
         if request.method == 'POST':
             action = request.form.get('action')
 
@@ -650,7 +650,7 @@ def cart_overview():
                 item_id = int(request.form.get('item_id'))
                 new_quantity = int(request.form.get('quantity'))
                 
-                # Update the quantity in the session
+                
                 for item in cart:
                     if item['item_id'] == item_id:
                         item['quantity'] = new_quantity
@@ -661,7 +661,7 @@ def cart_overview():
             elif action == 'remove':
                 item_id = int(request.form.get('item_id'))
                 
-                # Remove the item from the cart in the session
+                
                 cart = [item for item in cart if item['item_id'] != item_id]
 
                 flash('Item removed from the cart!', 'success')
@@ -669,9 +669,9 @@ def cart_overview():
             elif action == 'place_order':
                 additional_notes = request.form.get('additional_notes')
 
-                # Check if the cart is not empty
+                
                 if cart:
-                    # Fetch restaurant_id based on the items in the cart
+                    
                     restaurant_id = get_restaurant_id_for_cart(cart)
 
                     
@@ -680,13 +680,13 @@ def cart_overview():
                         VALUES (?, ?, ?, ?, ?, ?, ?)
                     ''', [(user_id, restaurant_id, item['item_id'], item['quantity'], additional_notes, total_price, 'In Bearbeitung') for item in cart])
 
-                    # Commit the changes to the database
+                    
                     conn.commit()
 
-                    # Fetch the order_id after inserting into the Orders table
+                    
                     order_id = cursor.lastrowid
 
-                    # Clear the cart in the session
+                    
                     session.pop(cart_key, None)
 
                     update_order_status_route(order_id, 'In Bearbeitung')
@@ -695,10 +695,10 @@ def cart_overview():
                 else:
                     flash('Your cart is empty. Add items before placing an order.', 'error')
 
-                # Redirect to the thank you page after placing an order
+                
                 return redirect(url_for('thank_you'))
 
-            # Save the updated cart back to the session
+            
             session[cart_key] = cart
 
             

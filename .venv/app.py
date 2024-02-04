@@ -173,7 +173,6 @@ def register_restaurant():
         username = request.form['username']
         address = request.form['address']
         description = request.form['description']
-        image_path = request.form['image_path']
         password = request.form['password']
         opening_time = request.form['opening_time']
         closing_time = request.form['closing_time']
@@ -193,8 +192,8 @@ def register_restaurant():
         cursor = conn.cursor()
 
         
-        cursor.execute("INSERT INTO Restaurants (name, address, username, description, image_path, password_hash, opening_time, closing_time, delivery_radius) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        (name, address, username, description, image_path, password_hash, opening_time, closing_time, delivery_radius or ''))
+        cursor.execute("INSERT INTO Restaurants (name, address, username, description, password_hash, opening_time, closing_time, delivery_radius) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)",
+                        (name, address, username, description, password_hash, opening_time, closing_time, delivery_radius or ''))
 
 
 
@@ -689,7 +688,7 @@ def cart_overview():
                     
                     session.pop(cart_key, None)
 
-                    update_order_status_route(order_id, 'In Bearbeitung')
+                    
 
                     flash('Order placed successfully!', 'success')
                 else:
@@ -713,18 +712,18 @@ def cart_overview():
 
 
 def get_order_status(order_id):
-    conn = sqlite3.connect('mydatabase.db')  
+    conn = sqlite3.connect('mydatabase.db')  # Replace with your actual database name
     cursor = conn.cursor()
 
-    
+    # Assuming your Orders table has columns 'id' and 'status'
     cursor.execute("SELECT status FROM Orders WHERE id = ?", (order_id,))
     result = cursor.fetchone()
 
-    
+    # Close the database connection
     conn.close()
 
     if result:
-        return result[8]  
+        return result[0]  # Assuming the status is in the first column of the result
     else:
         return "Order Status Not Found"
 

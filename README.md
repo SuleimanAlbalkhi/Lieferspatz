@@ -8,5 +8,10 @@
 
 # Lieferspatz
 # ID = 1 ; Username= KFC; Passwort=asd123;
-# ID = 4 ; Username= McDonald ; Passwort=yxc456;
 # ID = 3; Username = Subway; pass = qwe789;
+# ID = 4 ; Username= McDonald ; Passwort=yxc456;
+# ID = 6; Username = Damila; pass = da12345678;
+# ID = 8 ; Username= alzaem; Passwort=123;
+# ID = 9 ; Username= maki; Passwort=123;
+# ID = 10 ; Username=Vapiano ; Passwort=123;
+# ID = 11 ; Username= ; Passwort=123;

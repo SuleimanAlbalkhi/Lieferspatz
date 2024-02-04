@@ -41,7 +41,7 @@
                             <form method="post" action="{{ url_for('update_order_status_route') }}">
                                 <input type="hidden" name="order_id" value="{{ order_with_items['order_details'][0] }}">
                                 <select name="new_status">
-                                    <option value="In Progress">In Progress</option>
+                                    <option value="In Progress">In preparation</option>
                                     <option value="Completed">Completed</option>
                                     <option value="Cancelled">Cancelled</option>
                                 </select>

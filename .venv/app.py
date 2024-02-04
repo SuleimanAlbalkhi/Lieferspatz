@@ -63,7 +63,7 @@ cursor.execute('''
         note TEXT,
         total_price FLOAT NOT NULL,
         order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        status Text,
+        status Text DEFAULT 'In Progress',
         FOREIGN KEY(user_id) REFERENCES Users(id),
         FOREIGN KEY(restaurant_id) REFERENCES Restaurants(id),
         FOREIGN KEY(item_id) REFERENCES MenuItems(id)
@@ -584,7 +584,14 @@ def get_ordered_items(order_id):
 def get_user_orders(user_id):
     conn = sqlite3.connect('mydatabase.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Orders WHERE user_id=?", (user_id,))
+    cursor.execute("""SELECT * FROM Orders WHERE user_id=? ORDER BY
+            CASE
+                WHEN status = 'In Progress' THEN 1
+                WHEN status = 'Completed' THEN 2
+                WHEN status = 'Cancelled' THEN 3
+                ELSE 4
+            END,
+            order_date DESC""", (user_id,))
     orders = cursor.fetchall()
     conn.close()
     return orders
@@ -593,7 +600,17 @@ def get_user_orders(user_id):
 def get_restaurant_orders(restaurant_id):
     conn = sqlite3.connect('mydatabase.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM Orders WHERE restaurant_id=?", (restaurant_id,))
+    cursor.execute("""SELECT *
+        FROM Orders
+        WHERE restaurant_id = ?
+        ORDER BY
+            CASE
+                WHEN status = 'In Progress' THEN 1
+                WHEN status = 'Completed' THEN 2
+                WHEN status = 'Cancelled' THEN 3
+                ELSE 4
+            END,
+            order_date DESC""", (restaurant_id,))
     orders = cursor.fetchall()
     conn.close()
     return orders
@@ -729,6 +746,7 @@ def get_order_status(order_id):
 
 
 
+
 @app.route('/customer_orders')
 def customer_orders():
     if 'user_id' in session:
@@ -757,6 +775,7 @@ def restaurant_orders():
 
         for order in orders:
             order_id = order[0]
+            status = get_order_status(order_id)
             ordered_items = get_ordered_items(order_id)
             orders_with_items.append({'order_details': order, 'ordered_items': ordered_items})
 
@@ -815,6 +834,8 @@ def get_restaurant_id_for_cart(cart):
     finally:
         
         conn.close()
+
+
     
 
 if __name__ == '__main__':

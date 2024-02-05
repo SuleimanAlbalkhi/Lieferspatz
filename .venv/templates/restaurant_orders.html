@@ -20,10 +20,11 @@
                     <th>Info</th>
                     <th>Ordered Items</th>
                     <th>Status</th>
+                    <th>Status Change</th>
                 </tr>
             </thead>
             <tbody>
-                {% for order_with_items in orders_with_items %}
+                {% for status, order_with_items in orders_with_items %}
                     <tr>
                         <td>{{ order_with_items['order_details'][0] }}</td>
                         <td>{{ order_with_items['order_details'][1] }}</td>
@@ -37,6 +38,7 @@
                                 {% endfor %}
                             </ul>
                         </td>
+                        <td>{{ status }}</td>
                         <td>
                             <form method="post" action="{{ url_for('update_order_status_route') }}">
                                 <input type="hidden" name="order_id" value="{{ order_with_items['order_details'][0] }}">

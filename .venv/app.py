@@ -777,7 +777,13 @@ def restaurant_orders():
             order_id = order[0]
             status = get_order_status(order_id)
             ordered_items = get_ordered_items(order_id)
-            orders_with_items.append({'order_details': order, 'ordered_items': ordered_items})
+
+            order_with_items = {
+                'order_details': order,  # Assuming order is a list or tuple
+                'ordered_items': ordered_items
+            }
+
+            orders_with_items.append((status, order_with_items))
 
         return render_template('restaurant_orders.html', orders_with_items=orders_with_items)
 

@@ -796,14 +796,7 @@ def update_order_status_route():
     if 'restaurant_id' in session:
         restaurant_id = session['restaurant_id']
 
-        order_id = request.form.get('order_id')
-        if isinstance(order_id, tuple):
-            order_id = order_id[0]
-
-        try:
-            order_id = int(order_id)
-        except ValueError:
-            return "Invalid order ID"    
+        order_id = int(request.form.get('order_id', 0))
         new_status = request.form.get('new_status')
 
         update_order_status_in_db(order_id, new_status)

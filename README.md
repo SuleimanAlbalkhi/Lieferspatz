@@ -2,6 +2,14 @@
 
 A web application for managing restaurant accounts and delivery orders using Flask and SQLite.
 
+## Video Review
+
+
+
+https://github.com/user-attachments/assets/5c63b5de-4494-4f89-97ae-d8facc4a8234
+
+
+
 ## Description
 
 Lieferspatz is a restaurant management system that allows restaurants to handle their accounts and manage delivery orders. Built with Flask and SQLite, it provides a simple and efficient way to manage restaurant operations.

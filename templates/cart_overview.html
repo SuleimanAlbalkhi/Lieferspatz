@@ -2,66 +2,71 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cart Overview</title>
+    <style>
+        body { background: linear-gradient(120deg, #fffbe6 0%, #ffe5b4 100%); font-family: 'Segoe UI', Arial, sans-serif; margin: 0; }
+        .header { background: #ff9800; color: #fff; padding: 1.2rem 0; text-align: center; font-size: 2rem; font-weight: bold; letter-spacing: 2px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+        .container { max-width: 700px; margin: 2rem auto; background: #fff; border-radius: 18px; box-shadow: 0 4px 24px rgba(255,152,0,0.12); padding: 2rem 2.5rem; }
+        h1 { color: #ff9800; margin-bottom: 0.5rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 0.7rem; border-bottom: 1px solid #ffe5b4; text-align: left; }
+        th { background: #ff9800; color: #fff; }
+        tr:nth-child(even) { background: #fffbe6; }
+        input[type="number"] { width: 60px; border-radius: 6px; border: 1px solid #ffe5b4; }
+        button { background: #ff9800; color: #fff; border: none; border-radius: 8px; padding: 0.4rem 1rem; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: #e65100; }
+        a { color: #388e3c; text-decoration: none; font-weight: bold; margin-right: 1.5rem; }
+        a:hover { color: #ff9800; }
+        .footer { text-align: center; color: #888; padding: 1.2rem 0 0.7rem 0; font-size: 1rem; }
+    </style>
 </head>
 <body>
-    <h1>Your Cart</h1>
-
-    {% if cart_items %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Item</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Total</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in cart_items %}
+    <div class="header">🛒 Lieferspatz - Your Cart</div>
+    <div class="container">
+        <h1>Your Cart</h1>
+        {% if cart_items %}
+            <table>
+                <thead>
                     <tr>
-                        <td>{{ item['name'] }}</td>
-                        <td>${{ item['price'] }}</td>
-                        <td>
-                            <form method="post" action="{{ url_for('cart_overview') }}">
-                                <input type="hidden" name="action" value="update">
-                                <input type="hidden" name="item_id" value="{{ item['id'] }}">
-                                <input type="number" name="quantity" value="{{ item['quantity'] }}" min="1">
-                                <button type="submit">Update</button>
-                            </form>
-                        </td>
-                        <td>${{ item['price'] * item['quantity'] }}</td>
-                        <td>
-                            <form method="post" action="{{ url_for('cart_overview') }}">
-                                <input type="hidden" name="action" value="remove">
-                                <input type="hidden" name="item_id" value="{{ item['id'] }}">
-                                <button type="submit">Remove</button>
-                            </form>
-                        </td>
+                        <th>Item</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Actions</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="3"><strong>Total</strong></td>
-                    <td colspan="2">${{ total_price }}</td>
-                </tr>
-            </tfoot>
-        </table>
-
-        <form method="post" action="{{ url_for('cart_overview') }}">
-            <input type="hidden" name="action" value="place_order">
-            <label for="additional_notes">Additional Notes:</label>
-            <textarea id="additional_notes" name="additional_notes" rows="4" cols="50"></textarea>
-            <button type="submit">Place Order</button>
-        </form>
-    {% else %}
-        <p>Your cart is empty.</p>
-    {% endif %}
-
-    <a href="{{ url_for('dashboard_user') }}">Back to Dashboard</a>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                        <tr>
+                            <td>{{ item['name'] }}</td>
+                            <td>${{ item['price'] }}</td>
+                            <td>
+                                <form method="post" action="{{ url_for('cart_overview') }}">
+                                    <input type="hidden" name="action" value="update">
+                                    <input type="hidden" name="item_id" value="{{ item['id'] }}">
+                                    <input type="number" name="quantity" value="{{ item['quantity'] }}" min="1">
+                                    <button type="submit">Update</button>
+                                </form>
+                            </td>
+                            <td>${{ item['price'] * item['quantity'] }}</td>
+                            <td>
+                                <form method="post" action="{{ url_for('cart_overview') }}">
+                                    <input type="hidden" name="action" value="remove">
+                                    <input type="hidden" name="item_id" value="{{ item['id'] }}">
+                                    <button type="submit">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Your cart is empty.</p>
+        {% endif %}
+        <br>
+        <a href="{{ url_for('dashboard_user') }}">&#8592; Back to Dashboard</a>
+    </div>
+    <div class="footer">&copy; 2025 Lieferspatz &mdash; Fresh food delivered with love!</div>
 </body>
 </html>

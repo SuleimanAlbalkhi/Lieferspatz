@@ -2,13 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thank You</title>
+    <style>
+        body { background: linear-gradient(120deg, #fffbe6 0%, #ffe5b4 100%); font-family: 'Segoe UI', Arial, sans-serif; margin: 0; }
+        .header { background: #ff9800; color: #fff; padding: 1.2rem 0; text-align: center; font-size: 2rem; font-weight: bold; letter-spacing: 2px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+        .container { max-width: 400px; margin: 2rem auto; background: #fff; border-radius: 18px; box-shadow: 0 4px 24px rgba(255,152,0,0.12); padding: 2rem 2.5rem; text-align: center; }
+        h1 { color: #ff9800; margin-bottom: 0.5rem; }
+        p { color: #388e3c; font-size: 1.2rem; }
+        a { color: #388e3c; text-decoration: none; font-weight: bold; display: block; margin-top: 1.5rem; }
+        a:hover { color: #ff9800; }
+        .footer { text-align: center; color: #888; padding: 1.2rem 0 0.7rem 0; font-size: 1rem; }
+    </style>
 </head>
 <body>
-    <h1>Thank You!</h1>
-    <p>Your order has been placed successfully. We appreciate your business!</p>
-    <a href="{{ url_for('dashboard_user') }}">Back to Dashboard</a>
+    <div class="header">🥳 Lieferspatz - Thank You!</div>
+    <div class="container">
+        <h1>Thank You!</h1>
+        <p>Your order has been placed successfully. We appreciate your business!</p>
+        <a href="{{ url_for('dashboard_user') }}">Back to Dashboard</a>
+    </div>
+    <div class="footer">&copy; 2025 Lieferspatz &mdash; Fresh food delivered with love!</div>
 </body>
 </html>

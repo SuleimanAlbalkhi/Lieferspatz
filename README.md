@@ -88,3 +88,5 @@ When contributing to this project:
 3. Test your changes with the provided test accounts
 4. Document any new features or changes
 
+## License
+© 2025 Lieferspatz

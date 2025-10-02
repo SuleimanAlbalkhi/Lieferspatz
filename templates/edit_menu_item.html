@@ -1,25 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Item bearbeiten</title>
+    <style>
+        body { background: linear-gradient(120deg, #fffbe6 0%, #ffe5b4 100%); font-family: 'Segoe UI', Arial, sans-serif; margin: 0; }
+        .header { background: #ff9800; color: #fff; padding: 1.2rem 0; text-align: center; font-size: 2rem; font-weight: bold; letter-spacing: 2px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+        .container { max-width: 400px; margin: 2rem auto; background: #fff; border-radius: 18px; box-shadow: 0 4px 24px rgba(255,152,0,0.12); padding: 2rem 2.5rem; }
+        h1 { color: #ff9800; margin-bottom: 0.5rem; }
+        label { color: #388e3c; font-weight: bold; display: block; margin-top: 1rem; }
+        input[type="text"], textarea {
+            width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid #ffe5b4; margin-top: 0.3rem; font-size: 1rem;
+        }
+        input[type="submit"] {
+            background: #ff9800; color: #fff; border: none; border-radius: 8px; padding: 0.7rem 2rem; font-size: 1.1rem; cursor: pointer; margin-top: 1.2rem; transition: background 0.2s;
+        }
+        input[type="submit"]:hover { background: #e65100; }
+        a { color: #388e3c; text-decoration: none; font-weight: bold; display: block; margin-top: 1.5rem; text-align: center; }
+        a:hover { color: #ff9800; }
+        .footer { text-align: center; color: #888; padding: 1.2rem 0 0.7rem 0; font-size: 1rem; }
+    </style>
 </head>
 <body>
-    <h1>Item bearbeiten</h1>
-
-    <form action="{{ url_for('edit_menu_item', item_id=menu_item[0]) }}" method="post" enctype="multipart/form-data">
-        <label>Name:</label>
-        <input type="text" name="name" value="{{ menu_item[2] }}" required><br>
-
-        <label>Beschreibung:</label>
-        <textarea name="description" required>{{ menu_item[3] }}</textarea><br>
-
-        <label>Preis:</label>
-        <input type="text" name="price" value="{{ menu_item[4] }}" required><br>
-
-        <input type="submit" value="Aktualisieren">
-    </form>
-    
-    <a href="{{ url_for('view_menu') }}">Zur Speisekarte gehen</a>
-
+    <div class="header">🍲 Lieferspatz - Item bearbeiten</div>
+    <div class="container">
+        <h1>Item bearbeiten</h1>
+        <form action="{{ url_for('edit_menu_item', item_id=menu_item[0]) }}" method="post" enctype="multipart/form-data">
+            <label>Name:</label>
+            <input type="text" name="name" value="{{ menu_item[2] }}" required>
+            <label>Beschreibung:</label>
+            <textarea name="description" required>{{ menu_item[3] }}</textarea>
+            <label>Preis:</label>
+            <input type="text" name="price" value="{{ menu_item[4] }}" required>
+            <input type="submit" value="Aktualisieren">
+        </form>
+        <a href="{{ url_for('view_menu') }}">Zur Speisekarte gehen</a>
+    </div>
+    <div class="footer">&copy; 2025 Lieferspatz &mdash; Fresh food delivered with love!</div>
 </body>
 </html>

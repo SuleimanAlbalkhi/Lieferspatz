@@ -4,17 +4,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to Lieferspatz!</title>
+    <style>
+        body {
+            background: linear-gradient(120deg, #fffbe6 0%, #ffe5b4 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background: #ff9800;
+            color: #fff;
+            padding: 1.5rem 0;
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        .container {
+            max-width: 400px;
+            margin: 2rem auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(255,152,0,0.12);
+            padding: 2rem 2.5rem;
+            text-align: center;
+        }
+        h1 {
+            color: #ff9800;
+            margin-bottom: 0.5rem;
+        }
+        .food-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        label {
+            margin: 0 1rem;
+            font-size: 1.1rem;
+            color: #388e3c;
+        }
+        input[type="submit"] {
+            background: #ff9800;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.7rem 2rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 1.2rem;
+            transition: background 0.2s;
+        }
+        input[type="submit"]:hover {
+            background: #e65100;
+        }
+        .footer {
+            text-align: center;
+            color: #888;
+            padding: 1.2rem 0 0.7rem 0;
+            font-size: 1rem;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to Lieferspatz!</h1>
-    <p>Are you a user or a restaurant?</p>
-    <form method="POST" action="{{ url_for('welcome') }}">
-        <label for="user">User</label>
-        <input type="radio" name="user_type" value="user" id="user" required>
-        <label for="restaurant">Restaurant</label>
-        <input type="radio" name="user_type" value="restaurant" id="restaurant" required>
-        <br>
-        <input type="submit" value="Continue">
-    </form>
+    <div class="header">
+        <span class="food-icon">🍔🍕🥗</span><br>
+        Lieferspatz
+    </div>
+    <div class="container">
+        <h1>Welcome!</h1>
+        <p>Are you a user or a restaurant?</p>
+        <form method="POST" action="{{ url_for('welcome') }}">
+            <label for="user">User</label>
+            <input type="radio" name="user_type" value="user" id="user" required>
+            <label for="restaurant">Restaurant</label>
+            <input type="radio" name="user_type" value="restaurant" id="restaurant" required>
+            <br>
+            <input type="submit" value="Continue">
+        </form>
+    </div>
+    <div class="footer">
+        &copy; 2025 Lieferspatz &mdash; Fresh food delivered with love!
+    </div>
 </body>
 </html>

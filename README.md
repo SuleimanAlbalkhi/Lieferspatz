@@ -1,17 +1,68 @@
-# لتشغيل البرنمج تحتاجوا التالي :
-# - VS Code: https://code.visualstudio.com/download
-# - GIT : https://www.git-scm.com/downloads (لنسخ الكود من الريبوزيتوري بالغت هب)
-# - SQLite: https://www.sqlite.org/index.html
-# - Flask ( VS Code في ال  Terminal داخل ال "pip install flask" انسخ هذا الأمر )   
-# - DB Browser for SQLite ( لمراقبة قاعدة البيانات ) https://sqlitebrowser.org/
+# Lieferspatz 🚚
 
+A web application for managing restaurant accounts and delivery orders using Flask and SQLite.
 
-# Lieferspatz
-# ID = 1 ; Username= KFC; Passwort=asd123;
-# ID = 3; Username = Subway; pass = qwe789;
-# ID = 4 ; Username= McDonald ; Passwort=yxc456;
-# ID = 6; Username = Damila; pass = da12345678;
-# ID = 8 ; Username= alzaem; Passwort=123;
-# ID = 9 ; Username= maki; Passwort=123;
-# ID = 10 ; Username=Vapiano ; Passwort=123;
-# ID = 11 ; Username= ; Passwort=123;
+## Description
+
+Lieferspatz is a restaurant management system that allows restaurants to handle their accounts and manage delivery orders. Built with Flask and SQLite, it provides a simple and efficient way to manage restaurant operations.
+
+## Prerequisites
+
+Before you begin, ensure you have the following tools installed:
+
+- [VS Code](https://code.visualstudio.com/download) - Code editor
+- [Git](https://www.git-scm.com/downloads) - Version control
+- [SQLite](https://www.sqlite.org/index.html) - Database
+- [DB Browser for SQLite](https://sqlitebrowser.org/) - Database management tool
+- Python 3.x
+
+## Setup
+
+1. Clone the repository:
+   ```bash
+   git clone [repository-url]
+   ```
+
+2. Navigate to the project directory:
+   ```bash
+   cd Lieferspatz
+   ```
+
+3. Install Flask:
+   ```bash
+   pip install flask
+   ```
+
+4. Start the application:
+   ```bash
+   flask run
+   ```
+
+The application will be available at `http://localhost:5000`
+
+## Database
+
+The application uses SQLite for data storage. The main database file is `mydatabase.db`. You can view and modify the database using DB Browser for SQLite.
+
+## Test Accounts
+
+The following test accounts are available for development and testing:
+
+| ID | Username  | Password    |
+|----|-----------|-------------|
+| 1  | KFC      | asd123      |
+| 3  | Subway   | qwe789      |
+| 4  | McDonald | yxc456      |
+| 6  | Damila   | da12345678  |
+| 8  | alzaem   | 123         |
+| 9  | maki     | 123         |
+| 10 | Vapiano  | 123         |
+
+## Contributing
+
+When contributing to this project:
+1. Use DB Browser for SQLite for database modifications
+2. Follow the existing code structure
+3. Test your changes with the provided test accounts
+4. Document any new features or changes
+

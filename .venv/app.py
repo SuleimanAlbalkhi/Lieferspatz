@@ -403,7 +403,8 @@ def query_restaurants_by_postal_code(postal_code):
             delivery_radius_str = restaurant[9]
             delivery_radius_list = [code.strip() for code in delivery_radius_str.replace('\r\n', ',').split(',')]
 
-
+            print(f"delivery_radius_list: {delivery_radius_list}")
+            
             # opening and closing times
             opening_time_str = restaurant[7]
             closing_time_str = restaurant[8]
@@ -740,7 +741,7 @@ def get_order_status(order_id):
     conn.close()
 
     if result:
-        return result[0]  # Assuming the status is in the first column of the result
+        return result[0]  
     else:
         return "Order Status Not Found"
 

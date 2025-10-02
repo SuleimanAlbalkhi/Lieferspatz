@@ -28,17 +28,39 @@ Before you begin, ensure you have the following tools installed:
    cd Lieferspatz
    ```
 
-3. Install Flask:
+3. Create and activate a virtual environment:
    ```bash
-   pip install flask
+   # Create virtual environment
+   python -m venv .venv
+
+   # Activate virtual environment
+   # For Windows PowerShell:
+   .\.venv\Scripts\Activate.ps1
+   # For Windows Command Prompt:
+   .\.venv\Scripts\activate.bat
    ```
 
-4. Start the application:
+4. Install Flask:
    ```bash
-   flask run
+   python -m pip install flask
+   ```
+
+5. Set the Flask application:
+   ```bash
+   # For Windows PowerShell:
+   $env:FLASK_APP = "app.py"
+   # For Windows Command Prompt:
+   set FLASK_APP=app.py
+   ```
+
+6. Start the application:
+   ```bash
+   python -m flask run
    ```
 
 The application will be available at `http://localhost:5000`
+
+Note: If you get "python command not found", make sure Python is installed and added to your system's PATH.
 
 ## Database
 
